@@ -1,0 +1,382 @@
+
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقرير الاختبارات الشامل - نظام إدارة المخزون</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .success { color: #4CAF50; }
+        .warning { color: #FF9800; }
+        .error { color: #f44336; }
+        .info { color: #2196F3; }
+        
+        .test-results {
+            padding: 30px;
+        }
+        
+        .test-suite {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .test-suite-header {
+            padding: 20px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .test-suite-success {
+            background: #e8f5e8;
+            border-right: 5px solid #4CAF50;
+        }
+        
+        .test-suite-failed {
+            background: #fce8e6;
+            border-right: 5px solid #f44336;
+        }
+        
+        .test-details {
+            padding: 20px;
+            background: #f9f9f9;
+            border-top: 1px solid #ddd;
+        }
+        
+        .test-output {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50 0%, #45a049 100%);
+            transition: width 0.3s ease;
+        }
+        
+        .timestamp {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 20px;
+            padding: 20px;
+            border-top: 1px solid #ddd;
+        }
+        
+        @media (max-width: 768px) {
+            .summary {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-number {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 تقرير الاختبارات الشامل</h1>
+            <p>نظام إدارة المخزون - اختبارات شاملة</p>
+        </div>
+        
+        <div class="summary">
+            <div class="stat-card">
+                <div class="stat-number info">0</div>
+                <div class="stat-label">إجمالي الاختبارات</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number success">0</div>
+                <div class="stat-label">نجح</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number warning">0</div>
+                <div class="stat-label">فشل</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number error">0</div>
+                <div class="stat-label">أخطاء</div>
+            </div>
+        </div>
+        
+        <div style="padding: 0 30px;">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 0.0%"></div>
+            </div>
+            <p style="text-align: center; color: #666;">
+                معدل النجاح: 0.0%
+            </p>
+        </div>
+        
+        <div class="test-results">
+            <h2>📋 تفاصيل النتائج</h2>
+
+            <div class="test-suite">
+                <div class="test-suite-header test-suite-failed">
+                    ❌ الاختبارات الأساسية الشاملة
+                    <span style="float: left; font-size: 0.9em;">
+                        ⏱️ 2.77s | 
+                        ✅ 0 | 
+                        ❌ 0 | 
+                        🔥 0
+                    </span>
+                </div>
+                
+                <div class="test-details">
+                    <p><strong>الملف:</strong> test_complete.py</p>
+                    <p><strong>الوقت المستغرق:</strong> 2.77 ثانية</p>
+                    <p><strong>رمز الإرجاع:</strong> 1</p>
+                    
+                    <details>
+                        <summary style="cursor: pointer; padding: 10px 0; font-weight: bold;">
+                            📄 عرض تفاصيل النتائج
+                        </summary>
+                        <div class="test-output">Error connecting to Google Sheets: Credentials file not found: test_credentials.json
+Error connecting to Google Sheets: Credentials file not found: test_credentials.json
+Error loading config: [WinError 3] The system cannot find the path specified: ''
+
+==================================================
+test_add_item_invalid_name (__main__.TestSheetsManager.test_add_item_invalid_name)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0625\u0636\u0627\u0641\u0629 \u0639\u0646\u0635\u0631 \u0628\u0627\u0633\u0645 \u063a\u064a\u0631 \u0635\u062d\u064a\u062d ... ok
+test_add_item_invalid_quantity (__main__.TestSheetsManager.test_add_item_invalid_quantity)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0625\u0636\u0627\u0641\u0629 \u0639\u0646\u0635\u0631 \u0628\u0643\u0645\u064a\u0629 \u063a\u064a\u0631 \u0635\u062d\u064a\u062d\u0629 ... ok
+test_add_item_success (__main__.TestSheetsManager.test_add_item_success)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0646\u062c\u0627\u062d \u0625\u0636\u0627\u0641\u0629 \u0639\u0646\u0635\u0631 ... ok
+test_connection_failure_invalid_spreadsheet (__main__.TestSheetsManager.test_connection_failure_invalid_spreadsheet)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0641\u0634\u0644 \u0627\u0644\u0627\u062a\u0635\u0627\u0644 \u0628\u0633\u0628\u0628 \u062c\u062f\u0648\u0644 \u063a\u064a\u0631 \u0645\u0648\u062c\u0648\u062f ... ok
+test_connection_failure_no_credentials (__main__.TestSheetsManager.test_connection_failure_no_credentials)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0641\u0634\u0644 \u0627\u0644\u0627\u062a\u0635\u0627\u0644 \u0628\u0633\u0628\u0628 \u0639\u062f\u0645 \u0648\u062c\u0648\u062f \u0645\u0644\u0641 \u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0627\u0639\u062a\u0645\u0627\u062f ... ok
+test_connection_success (__main__.TestSheetsManager.test_connection_success)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0646\u062c\u0627\u062d \u0627\u0644\u0627\u062a\u0635\u0627\u0644 ... ok
+test_get_all_items_empty_sheet (__main__.TestSheetsManager.test_get_all_items_empty_sheet)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u062c\u0644\u0628 \u0627\u0644\u0639\u0646\u0627\u0635\u0631 \u0645\u0646 \u062c\u062f\u0648\u0644 \u0641\u0627\u0631\u063a ... ok
+test_get_all_items_success (__main__.TestSheetsManager.test_get_all_items_success)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0646\u062c\u0627\u062d \u062c\u0644\u0628 \u062c\u0645\u064a\u0639 \u0627\u0644\u0639\u0646\u0627\u0635\u0631 ... ok
+test_outbound_item_insufficient_quantity (__main__.TestSheetsManager.test_outbound_item_insufficient_quantity)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0625\u062e\u0631\u0627\u062c \u0628\u0636\u0627\u0639\u0629 \u0628\u0643\u0645\u064a\u0629 \u0623\u0643\u0628\u0631 \u0645\u0646 \u0627\u0644\u0645\u062a\u0627\u062d ... ok
+test_outbound_item_success (__main__.TestSheetsManager.test_outbound_item_success)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0646\u062c\u0627\u062d \u0625\u062e\u0631\u0627\u062c \u0628\u0636\u0627\u0639\u0629 ... ok
+test_remove_item_not_found (__main__.TestSheetsManager.test_remove_item_not_found)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u062d\u0630\u0641 \u0639\u0646\u0635\u0631 \u063a\u064a\u0631 \u0645\u0648\u062c\u0648\u062f ... ok
+test_remove_item_success (__main__.TestSheetsManager.test_remove_item_success)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0646\u062c\u0627\u062d \u062d\u0630\u0641 \u0639\u0646\u0635\u0631 ... ok
+test_update_quantity_item_not_found (__main__.TestSheetsManager.test_update_quantity_item_not_found)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u062a\u062d\u062f\u064a\u062b \u0643\u0645\u064a\u0629 \u0639\u0646\u0635\u0631 \u063a\u064a\u0631 \u0645\u0648\u062c\u0648\u062f ... ok
+test_update_quantity_success (__main__.TestSheetsManager.test_update_quantity_success)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0646\u062c\u0627\u062d \u062a\u062d\u062f\u064a\u062b \u0627\u0644\u0643\u0645\u064a\u0629 ... ok
+test_add_item_dialog_invalid_input (__main__.TestGUIComponents.test_add_item_dialog_invalid_input)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u062d\u0648\u0627\u0631 \u0625\u0636\u0627\u0641\u0629 \u0639\u0646\u0635\u0631 \u0628\u0645\u062f\u062e\u0644\u0627\u062a \u063a\u064a\u0631 \u0635\u062d\u064a\u062d\u0629 ... ok
+test_add_item_dialog_valid_input (__main__.TestGUIComponents.test_add_item_dialog_valid_input)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u062d\u0648\u0627\u0631 \u0625\u0636\u0627\u0641\u0629 \u0639\u0646\u0635\u0631 \u0628\u0645\u062f\u062e\u0644\u0627\u062a \u0635\u062d\u064a\u062d\u0629 ... ok
+test_edit_quantity_dialog_valid_input (__main__.TestGUIComponents.test_edit_quantity_dialog_valid_input)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u062d\u0648\u0627\u0631 \u062a\u0639\u062f\u064a\u0644 \u0627\u0644\u0643\u0645\u064a\u0629 \u0628\u0645\u062f\u062e\u0644\u0627\u062a \u0635\u062d\u064a\u062d\u0629 ... ok
+test_main_window_creation (__main__.TestGUIComponents.test_main_window_creation)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0625\u0646\u0634\u0627\u0621 \u0627\u0644\u0646\u0627\u0641\u0630\u0629 \u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629 ... ok
+test_outbound_dialog_invalid_input (__main__.TestGUIComponents.test_outbound_dialog_invalid_input)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u062d\u0648\u0627\u0631 \u0625\u062e\u0631\u0627\u062c \u0627\u0644\u0628\u0636\u0627\u0639\u0629 \u0628\u0645\u062f\u062e\u0644\u0627\u062a \u063a\u064a\u0631 \u0635\u062d\u064a\u062d\u0629 ... ok
+test_outbound_dialog_valid_input (__main__.TestGUIComponents.test_outbound_dialog_valid_input)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u062d\u0648\u0627\u0631 \u0625\u062e\u0631\u0627\u062c \u0627\u0644\u0628\u0636\u0627\u0639\u0629 \u0628\u0645\u062f\u062e\u0644\u0627\u062a \u0635\u062d\u064a\u062d\u0629 ... ok
+test_load_config_file_not_found (__main__.TestConfiguration.test_load_config_file_not_found)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u062a\u062d\u0645\u064a\u0644 \u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a \u0639\u0646\u062f \u0639\u062f\u0645 \u0648\u062c\u0648\u062f \u0627\u0644\u0645\u0644\u0641 ... ok
+test_load_config_success (__main__.TestConfiguration.test_load_config_success)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0646\u062c\u0627\u062d \u062a\u062d\u0645\u064a\u0644 \u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a ... ok
+test_save_config_success (__main__.TestConfiguration.test_save_config_success)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0646\u062c\u0627\u062d \u062d\u0641\u0638 \u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a ... ok
+test_get_text_formatting_error (__main__.TestLocalization.test_get_text_formatting_error)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u062e\u0637\u0623 \u0641\u064a \u0627\u0644\u062a\u0646\u0633\u064a\u0642 ... ok
+test_get_text_missing_key (__main__.TestLocalization.test_get_text_missing_key)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0627\u0633\u062a\u0631\u062c\u0627\u0639 \u0646\u0635 \u063a\u064a\u0631 \u0645\u0648\u062c\u0648\u062f ... ok
+test_get_text_simple (__main__.TestLocalization.test_get_text_simple)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0627\u0633\u062a\u0631\u062c\u0627\u0639 \u0646\u0635 \u0628\u0633\u064a\u0637 ... ok
+test_get_text_with_formatting (__main__.TestLocalization.test_get_text_with_formatting)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0627\u0633\u062a\u0631\u062c\u0627\u0639 \u0646\u0635 \u0645\u0639 \u062a\u0646\u0633\u064a\u0642 ... ok
+test_complete_workflow (__main__.TestIntegration.test_complete_workflow)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u062a\u062f\u0641\u0642 \u0627\u0644\u0639\u0645\u0644 \u0627\u0644\u0643\u0627\u0645\u0644 ... ok
+test_error_handling_workflow (__main__.TestIntegration.test_error_handling_workflow)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u062a\u062f\u0641\u0642 \u0627\u0644\u0639\u0645\u0644 \u0645\u0639 \u0627\u0644\u0623\u062e\u0637\u0627\u0621 ... ok
+test_large_dataset_handling (__main__.TestPerformance.test_large_dataset_handling)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0627\u0644\u062a\u0639\u0627\u0645\u0644 \u0645\u0639 \u0643\u0645\u064a\u0629 \u0643\u0628\u064a\u0631\u0629 \u0645\u0646 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a ... ok
+test_memory_usage (__main__.TestPerformance.test_memory_usage)
+\u0627\u062e\u062a\u0628\u0627\u0631 \u0627\u0633\u062a\u0647\u0644\u0627\u0643 \u0627\u0644\u0630\u0627\u0643\u0631\u0629 ... ok
+
+----------------------------------------------------------------------
+Ran 31 tests in 1.384s
+
+OK
+Traceback (most recent call last):
+  File "D:\StrucTech Projects\Inventory System\tests\test_complete.py", line 637, in <module>
+    success = run_all_tests()
+              ^^^^^^^^^^^^^^^
+  File "D:\StrucTech Projects\Inventory System\tests\test_complete.py", line 627, in run_all_tests
+    print(f"\u0646\u062a\u0627\u0626\u062c \u0627\u0644\u0627\u062e\u062a\u0628\u0627\u0631\u0627\u062a:")
+  File "C:\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-4: character maps to <undefined>
+</div>
+                    </details>
+                </div>
+            </div>
+        
+            <div class="test-suite">
+                <div class="test-suite-header test-suite-failed">
+                    ❌ اختبارات الضغط والتحمل
+                    <span style="float: left; font-size: 0.9em;">
+                        ⏱️ 1.28s | 
+                        ✅ 0 | 
+                        ❌ 0 | 
+                        🔥 0
+                    </span>
+                </div>
+                
+                <div class="test-details">
+                    <p><strong>الملف:</strong> test_stress.py</p>
+                    <p><strong>الوقت المستغرق:</strong> 1.28 ثانية</p>
+                    <p><strong>رمز الإرجاع:</strong> 1</p>
+                    
+                    <details>
+                        <summary style="cursor: pointer; padding: 10px 0; font-weight: bold;">
+                            📄 عرض تفاصيل النتائج
+                        </summary>
+                        <div class="test-output">Traceback (most recent call last):
+  File "D:\StrucTech Projects\Inventory System\tests\test_stress.py", line 392, in <module>
+    success = run_stress_tests()
+              ^^^^^^^^^^^^^^^^^^
+  File "D:\StrucTech Projects\Inventory System\tests\test_stress.py", line 346, in run_stress_tests
+    print("\u0628\u062f\u0621 \u0627\u062e\u062a\u0628\u0627\u0631\u0627\u062a \u0627\u0644\u0636\u063a\u0637 \u0648\u0627\u0644\u062a\u062d\u0645\u0644...")
+  File "C:\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-2: character maps to <undefined>
+</div>
+                    </details>
+                </div>
+            </div>
+        
+            <div class="test-suite">
+                <div class="test-suite-header test-suite-failed">
+                    ❌ اختبارات الأمان والحماية
+                    <span style="float: left; font-size: 0.9em;">
+                        ⏱️ 1.30s | 
+                        ✅ 0 | 
+                        ❌ 0 | 
+                        🔥 0
+                    </span>
+                </div>
+                
+                <div class="test-details">
+                    <p><strong>الملف:</strong> test_security.py</p>
+                    <p><strong>الوقت المستغرق:</strong> 1.30 ثانية</p>
+                    <p><strong>رمز الإرجاع:</strong> 1</p>
+                    
+                    <details>
+                        <summary style="cursor: pointer; padding: 10px 0; font-weight: bold;">
+                            📄 عرض تفاصيل النتائج
+                        </summary>
+                        <div class="test-output">Traceback (most recent call last):
+  File "D:\StrucTech Projects\Inventory System\tests\test_security.py", line 363, in <module>
+    success = run_security_tests()
+              ^^^^^^^^^^^^^^^^^^^^
+  File "D:\StrucTech Projects\Inventory System\tests\test_security.py", line 319, in run_security_tests
+    print("\u0628\u062f\u0621 \u0627\u062e\u062a\u0628\u0627\u0631\u0627\u062a \u0627\u0644\u0623\u0645\u0627\u0646 \u0648\u0627\u0644\u062d\u0645\u0627\u064a\u0629...")
+  File "C:\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-2: character maps to <undefined>
+</div>
+                    </details>
+                </div>
+            </div>
+        
+        </div>
+        
+        <div class="timestamp">
+            <p>تم إنتاج هذا التقرير في: 2025-10-11 14:29:07</p>
+            <p>🏗️ نظام إدارة المخزون - اختبارات الجودة الشاملة</p>
+        </div>
+    </div>
+</body>
+</html>

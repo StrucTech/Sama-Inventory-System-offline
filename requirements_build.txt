@@ -1,0 +1,27 @@
+# متطلبات بناء النسخة المستقلة
+pyinstaller==6.2.0
+auto-py-to-exe==2.43.1
+
+# متطلبات التطبيق الأساسية
+gspread==5.12.4
+google-auth==2.25.2
+google-auth-oauthlib==1.1.0
+google-auth-httplib2==0.2.0
+
+# مكتبات الرسوم البيانية والتحليل
+matplotlib==3.7.2
+seaborn==0.12.2
+numpy==1.24.3
+pandas==2.0.3
+
+# دعم اللغة العربية
+arabic-reshaper==3.0.0
+python-bidi==0.4.2
+
+# مكتبات الشبكة والتحديث
+requests==2.31.0
+urllib3==2.0.7
+
+# مكتبات إضافية
+pillow==10.1.0
+openpyxl==3.1.2

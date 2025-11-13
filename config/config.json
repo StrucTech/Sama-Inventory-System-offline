@@ -1,0 +1,21 @@
+{
+    "credentials_file": "config/credentials.json",
+    "spreadsheet_name": "Inventory Management",
+    "worksheet_name": "Inventory",
+    "columns": {
+        "item_name": "A",
+        "quantity": "B",
+        "unit_price": "C",
+        "total_value": "D",
+        "last_updated": "E"
+    },
+    "window": {
+        "width": 800,
+        "height": 600
+    },
+    "activity_log_name": "Activity_Log",
+    "language": "english",
+    "auto_refresh_minutes": 5,
+    "auto_connect_startup": true,
+    "max_log_entries": 1000
+}

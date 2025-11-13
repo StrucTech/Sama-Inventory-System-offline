@@ -1,0 +1,51 @@
+{
+  "app_info": {
+    "name": "نظام إدارة المخزون",
+    "version": "1.0.0",
+    "description": "نظام متقدم لإدارة المخزون والمواد",
+    "company": "StrucTech Solutions",
+    "copyright": "© 2025 StrucTech Solutions"
+  },
+  "build_settings": {
+    "main_script": "main_with_auth.py",
+    "output_name": "نظام إدارة المخزون",
+    "console_mode": false,
+    "one_file": false,
+    "icon": "icon.ico",
+    "include_files": [
+      "gui",
+      "sheets", 
+      "config",
+      "localization",
+      "docs",
+      "requirements.txt",
+      "README.md"
+    ],
+    "hidden_imports": [
+      "tkinter",
+      "tkinter.ttk",
+      "gspread",
+      "google.auth",
+      "matplotlib",
+      "seaborn",
+      "arabic_reshaper",
+      "python_bidi",
+      "requests"
+    ]
+  },
+  "update_settings": {
+    "enabled": true,
+    "check_interval": 24,
+    "auto_update": true,
+    "backup_enabled": true,
+    "update_url": "https://api.github.com/repos/StrucTech/Sama-Inventory-System/releases/latest",
+    "notification_enabled": true
+  },
+  "distribution": {
+    "create_installer": false,
+    "create_zip": true,
+    "include_readme": true,
+    "include_config_template": true,
+    "include_documentation": true
+  }
+}
