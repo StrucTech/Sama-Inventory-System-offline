@@ -39,10 +39,29 @@ jobs:
         $env:PYTHONUTF8=1
         python build_setup.py
         
+    - name: Check Build Output
+      run: |
+        echo "Checking build output..."
+        if (Test-Path "dist") {
+          echo "[OK] dist folder exists"
+          Get-ChildItem -Path "dist" -Recurse | Select-Object Name,FullName
+        } else {
+          echo "[ERROR] dist folder not found!"
+          exit 1
+        }
+        
     - name: Create ZIP Archive
       run: |
-        cd dist
-        7z a -tzip "../Sama-Inventory-System-${{ github.ref_name }}.zip" "نظام إدارة المخزون"
+        echo "Creating ZIP archive..."
+        if (Test-Path "dist/SamaInventorySystem") {
+          echo "[OK] Found SamaInventorySystem folder"
+          7z a -tzip "Sama-Inventory-System-${{ github.ref_name }}.zip" "dist/SamaInventorySystem/*"
+        } else {
+          echo "[ERROR] SamaInventorySystem folder not found in dist!"
+          echo "Available folders:"
+          Get-ChildItem -Path "dist" -Directory
+          exit 1
+        }
         
     - name: Get Release Info
       id: release_info

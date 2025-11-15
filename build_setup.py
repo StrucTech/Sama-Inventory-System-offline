@@ -10,7 +10,8 @@ from pathlib import Path
 import PyInstaller.__main__
 
 # معلومات البرنامج
-APP_NAME = "نظام إدارة المخزون"
+APP_NAME = "SamaInventorySystem"
+APP_DISPLAY_NAME = "نظام إدارة المخزون"  # للعرض فقط
 APP_VERSION = "1.0.0"
 APP_DESCRIPTION = "نظام متقدم لإدارة المخزون والمواد"
 MAIN_SCRIPT = "main_with_auth.py"
@@ -186,7 +187,7 @@ def copy_additional_files():
 def create_user_readme(dist_dir):
     """إنشاء ملف README للمستخدم النهائي"""
     readme_content = f'''
-# {APP_NAME} - النسخة المستقلة
+# {APP_DISPLAY_NAME} - النسخة المستقلة
 
 ## متطلبات التشغيل:
 - نظام تشغيل Windows 10 أو أحدث
