@@ -14,8 +14,7 @@ from .add_item_dialog import AddItemDialog
 from .edit_quantity_dialog import EditQuantityDialog
 from .outbound_dialog import OutboundDialog
 from .admin_projects_window import AdminProjectsWindow
-from enhanced_sheets_manager import EnhancedSheetsManager
-from new_filter_window import NewFilterSearchWindow
+from sheets.manager import SheetsManager
 from localization import get_text
 
 # مخطط الألوان الفاخر للنافذة الرئيسية
@@ -546,10 +545,8 @@ class MainWindow:
             return
         
         try:
-            # استخدام EnhancedSheetsManager للحصول على العمليات الحديثة
-            from enhanced_sheets_manager import EnhancedSheetsManager
-            
-            enhanced_manager = EnhancedSheetsManager(
+            # استخدام SheetsManager للحصول على العمليات الحديثة
+            enhanced_manager = SheetsManager(
                 credentials_file=self.sheets_manager.credentials_file,
                 spreadsheet_name=self.sheets_manager.spreadsheet_name
             )
@@ -983,7 +980,7 @@ class MainWindow:
             print("📊 فتح نافذة التحليل والرؤى...")
             
             # إنشاء مدير محسن جديد
-            enhanced_manager = EnhancedSheetsManager(
+            enhanced_manager = SheetsManager(
                 self.sheets_manager.credentials_file,
                 self.sheets_manager.spreadsheet_name,
                 self.sheets_manager.worksheet_name
@@ -1016,7 +1013,7 @@ class MainWindow:
             print("🔍 فتح نافذة البحث المحسنة...")
             
             # إنشاء مدير محسن من المدير الحالي
-            enhanced_manager = EnhancedSheetsManager(
+            enhanced_manager = SheetsManager(
                 self.sheets_manager.credentials_file,
                 self.sheets_manager.spreadsheet_name,
                 self.sheets_manager.worksheet_name
@@ -1031,9 +1028,9 @@ class MainWindow:
                 if activity_data:
                     print(f"✅ تم العثور على البيانات الجديدة: {len(activity_data)} سجل")
                     # فتح النافذة الجديدة مع تمرير معلومات المستخدم
-                    from new_filter_window import NewFilterSearchWindow
-                    filter_window = NewFilterSearchWindow(self.root, enhanced_manager, self.current_user)
-                    print("✅ تم فتح نافذة البحث المحسنة")
+                    # TODO: إعادة تفعيل نافذة البحث المحسنة
+                    messagebox.showinfo("قريباً", "ميزة البحث المحسن ستتوفر في التحديث القادم")
+                    print("⚠️ ميزة البحث المحسن معطلة مؤقتاً")
                 else:
                     print("⚠️ لا توجد بيانات في الشيت الجديد")
                     messagebox.showwarning("تحذير", 

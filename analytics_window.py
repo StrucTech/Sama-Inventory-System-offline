@@ -920,7 +920,7 @@ def test_analytics():
         sys.path.append(r'D:\StrucTech Projects\Inventory System')
         
         from config.settings import load_config
-        from enhanced_sheets_manager import EnhancedSheetsManager
+        from sheets.manager import SheetsManager
         
         # تحميل الإعدادات
         config = load_config()
@@ -930,7 +930,7 @@ def test_analytics():
         root.withdraw()  # إخفاء النافذة الرئيسية
         
         # إنشاء المدير المحسن
-        enhanced_manager = EnhancedSheetsManager(
+        enhanced_manager = SheetsManager(
             credentials_file=config['credentials_file'],
             spreadsheet_name=config['spreadsheet_name'],
             worksheet_name=config['worksheet_name']

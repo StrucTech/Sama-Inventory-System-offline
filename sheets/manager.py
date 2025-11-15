@@ -110,14 +110,9 @@ class SheetsManager:
             current_user: Current user performing the operation
         """
         try:
-            # استخدام EnhancedSheetsManager للكتابة في الشيت الجديد
-            from enhanced_sheets_manager import EnhancedSheetsManager
-            
-            # إنشاء enhanced manager مؤقت
-            enhanced_manager = EnhancedSheetsManager(
-                credentials_file=self.credentials_file,
-                spreadsheet_name=self.spreadsheet_name
-            )
+            # استخدام SheetsManager للكتابة في الشيت الجديد
+            # Using current manager instance
+            enhanced_manager = self
             
             if enhanced_manager.connect():
                 # تحديد الكميات حسب نوع العملية
