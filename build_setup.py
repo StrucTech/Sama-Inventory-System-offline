@@ -152,19 +152,32 @@ def build_executable():
     # تنظيف المجلدات السابقة
     clean_build_dirs()
     
-    # إنشاء الملفات المطلوبة
-    create_spec_file()
+    # إنشاء ملف معلومات الإصدار
     create_version_info()
     
-    # بناء التطبيق باستخدام PyInstaller
-    spec_filename = f'{APP_NAME}.spec'
-    PyInstaller.__main__.run([
-        spec_filename,
+    # بناء التطبيق باستخدام PyInstaller مباشرة
+    args = [
+        MAIN_SCRIPT,
+        '--name', APP_NAME,
+        '--onedir',
+        '--windowed',
         '--clean',
         '--noconfirm',
-    ])
+    ]
     
-    print(f"[INFO] PyInstaller completed using {spec_filename}")
+    # إضافة ملف الأيقونة إذا كان موجود
+    if os.path.exists('icon.ico'):
+        args.extend(['--icon', 'icon.ico'])
+    
+    # إضافة ملف معلومات الإصدار
+    if os.path.exists('version_info.txt'):
+        args.extend(['--version-file', 'version_info.txt'])
+    
+    # تشغيل PyInstaller
+    print(f"[INFO] Running PyInstaller with args: {' '.join(args)}")
+    PyInstaller.__main__.run(args)
+    
+    print("[INFO] PyInstaller completed")
     
     # التحقق من نتيجة البناء
     dist_path = Path('dist')
@@ -172,6 +185,13 @@ def build_executable():
         print(f"[INFO] Contents of dist folder:")
         for item in dist_path.iterdir():
             print(f"  - {item.name} ({'folder' if item.is_dir() else 'file'})")
+            if item.is_dir():
+                print(f"    Contents of {item.name}:")
+                for subitem in item.iterdir():
+                    print(f"      - {subitem.name}")
+    else:
+        print("[ERROR] dist folder not created!")
+        return
     
     print("[SUCCESS] Executable built successfully!")
     
