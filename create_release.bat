@@ -42,10 +42,14 @@ if "%NEW_VERSION%"=="" (
     exit /b 1
 )
 
+:: تحويل V الكبيرة إلى v الصغيرة
+set NEW_VERSION=%NEW_VERSION:V=v%
+
 :: التحقق من تنسيق الإصدار
 echo %NEW_VERSION% | findstr /r "^v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$" > nul
 if errorlevel 1 (
     echo ❌ تنسيق الإصدار غير صحيح! استخدم v1.0.0
+    echo المدخل: %NEW_VERSION%
     pause
     exit /b 1
 )

@@ -24,6 +24,15 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements_build.txt
         
+    - name: Check Files Before Build
+      run: |
+        echo "📁 Checking project files..."
+        dir
+        echo "🔍 Looking for main file..."
+        if (Test-Path "main_with_auth.py") { echo "✅ main_with_auth.py found" } else { echo "❌ main_with_auth.py missing" }
+        if (Test-Path "requirements_build.txt") { echo "✅ requirements_build.txt found" } else { echo "❌ requirements_build.txt missing" }
+        if (Test-Path "build_setup.py") { echo "✅ build_setup.py found" } else { echo "❌ build_setup.py missing" }
+        
     - name: Build Executable
       run: |
         python build_setup.py
@@ -42,14 +51,13 @@ jobs:
           echo "release_name=Sama Inventory System v$version" >> $env:GITHUB_OUTPUT
         }
         
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
+    - name: Create Release and Upload Asset
+      uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref_name }}
-        release_name: ${{ steps.release_info.outputs.release_name }}
+        name: ${{ steps.release_info.outputs.release_name }}
         body: |
           🎉 **نسخة جديدة من نظام إدارة المخزون Sama**
           
@@ -69,18 +77,9 @@ jobs:
           ---
           الإصدار: ${{ steps.release_info.outputs.version }}
           تاريخ البناء: ${{ github.event.head_commit.timestamp }}
+        files: ./Sama-Inventory-System-${{ github.ref_name }}.zip
         draft: false
         prerelease: false
-        
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Sama-Inventory-System-${{ github.ref_name }}.zip
-        asset_name: Sama-Inventory-System-${{ github.ref_name }}.zip
-        asset_content_type: application/zip
         
     # إشعار بنجاح البناء (اختياري)
     - name: Notify Success
