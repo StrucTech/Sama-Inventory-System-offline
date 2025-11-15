@@ -2,6 +2,12 @@
     "credentials_file": "config/credentials.json",
     "spreadsheet_name": "Inventory Management",
     "worksheet_name": "Inventory",
+    "users_sheet": "Users",
+    "activity_log_sheet": "Activity_Log",
+    "google_scopes": [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ],
     "columns": {
         "item_name": "A",
         "quantity": "B",
@@ -10,12 +16,8 @@
         "last_updated": "E"
     },
     "window": {
-        "width": 800,
-        "height": 600
+        "width": 1000,
+        "height": 700
     },
-    "activity_log_name": "Activity_Log",
-    "language": "english",
-    "auto_refresh_minutes": 5,
-    "auto_connect_startup": true,
-    "max_log_entries": 1000
+    "theme": "luxury"
 }
