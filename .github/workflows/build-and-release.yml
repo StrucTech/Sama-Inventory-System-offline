@@ -44,7 +44,11 @@ jobs:
         echo "Checking build output..."
         if (Test-Path "dist") {
           echo "[OK] dist folder exists"
-          Get-ChildItem -Path "dist" -Recurse | Select-Object Name,FullName
+          echo "Contents of dist folder:"
+          Get-ChildItem -Path "dist" | ForEach-Object { echo "  $($_.Name) ($($_.GetType().Name))" }
+          echo ""
+          echo "All files and folders in dist (recursive):"
+          Get-ChildItem -Path "dist" -Recurse | ForEach-Object { echo "  $($_.FullName)" }
         } else {
           echo "[ERROR] dist folder not found!"
           exit 1
@@ -53,13 +57,32 @@ jobs:
     - name: Create ZIP Archive
       run: |
         echo "Creating ZIP archive..."
-        if (Test-Path "dist/SamaInventorySystem") {
-          echo "[OK] Found SamaInventorySystem folder"
-          7z a -tzip "Sama-Inventory-System-${{ github.ref_name }}.zip" "dist/SamaInventorySystem/*"
+        $distFolders = Get-ChildItem -Path "dist" -Directory
+        
+        if ($distFolders.Count -eq 0) {
+          echo "[ERROR] No folders found in dist!"
+          echo "Checking for .exe files directly in dist:"
+          Get-ChildItem -Path "dist" -Filter "*.exe"
+          exit 1
+        }
+        
+        $targetFolder = $distFolders[0].Name
+        echo "[INFO] Using folder: $targetFolder"
+        
+        if (Test-Path "dist/$targetFolder") {
+          echo "[OK] Creating ZIP from dist/$targetFolder"
+          7z a -tzip "Sama-Inventory-System-${{ github.ref_name }}.zip" "dist/$targetFolder/*"
+          
+          # Check if ZIP was created successfully
+          if (Test-Path "Sama-Inventory-System-${{ github.ref_name }}.zip") {
+            $zipSize = (Get-Item "Sama-Inventory-System-${{ github.ref_name }}.zip").Length
+            echo "[SUCCESS] ZIP created successfully - Size: $zipSize bytes"
+          } else {
+            echo "[ERROR] ZIP file was not created!"
+            exit 1
+          }
         } else {
-          echo "[ERROR] SamaInventorySystem folder not found in dist!"
-          echo "Available folders:"
-          Get-ChildItem -Path "dist" -Directory
+          echo "[ERROR] Folder dist/$targetFolder not accessible!"
           exit 1
         }
         

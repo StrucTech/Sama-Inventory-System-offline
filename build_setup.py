@@ -100,10 +100,11 @@ exe = EXE(
 )
 '''
     
-    with open('inventory_system.spec', 'w', encoding='utf-8') as f:
+    spec_filename = f'{APP_NAME}.spec'
+    with open(spec_filename, 'w', encoding='utf-8') as f:
         f.write(spec_content)
     
-    print("[INFO] Spec file created")
+    print(f"[INFO] Spec file created: {spec_filename}")
 
 def create_version_info():
     """إنشاء ملف معلومات الإصدار"""
@@ -156,11 +157,21 @@ def build_executable():
     create_version_info()
     
     # بناء التطبيق باستخدام PyInstaller
+    spec_filename = f'{APP_NAME}.spec'
     PyInstaller.__main__.run([
-        'inventory_system.spec',
+        spec_filename,
         '--clean',
         '--noconfirm',
     ])
+    
+    print(f"[INFO] PyInstaller completed using {spec_filename}")
+    
+    # التحقق من نتيجة البناء
+    dist_path = Path('dist')
+    if dist_path.exists():
+        print(f"[INFO] Contents of dist folder:")
+        for item in dist_path.iterdir():
+            print(f"  - {item.name} ({'folder' if item.is_dir() else 'file'})")
     
     print("[SUCCESS] Executable built successfully!")
     
