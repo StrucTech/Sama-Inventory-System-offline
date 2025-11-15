@@ -1,6 +1,6 @@
 """
-إعداد بناء النسخة المستقلة من برنامج إدارة المخزون
-يقوم بإنشاء ملف .exe قابل للتشغيل على أي جهاز Windows
+Build script for Sama Inventory Management System
+Creates standalone .exe executable for Windows
 """
 
 import os
@@ -21,7 +21,7 @@ def clean_build_dirs():
     for dir_name in dirs_to_clean:
         if os.path.exists(dir_name):
             shutil.rmtree(dir_name)
-            print(f"🗑️ تم حذف {dir_name}")
+            print(f"[INFO] Removed {dir_name}")
 
 def create_spec_file():
     """إنشاء ملف .spec مخصص لـ PyInstaller"""
@@ -102,7 +102,7 @@ exe = EXE(
     with open('inventory_system.spec', 'w', encoding='utf-8') as f:
         f.write(spec_content)
     
-    print("📋 تم إنشاء ملف .spec")
+    print("[INFO] Spec file created")
 
 def create_version_info():
     """إنشاء ملف معلومات الإصدار"""
@@ -141,11 +141,11 @@ VSVersionInfo(
     with open('version_info.txt', 'w', encoding='utf-8') as f:
         f.write(version_info)
     
-    print("📄 تم إنشاء ملف معلومات الإصدار")
+    print("[INFO] Version info file created")
 
 def build_executable():
     """بناء الملف التنفيذي"""
-    print("🔨 بدء بناء النسخة المستقلة...")
+    print("[INFO] Starting build process...")
     
     # تنظيف المجلدات السابقة
     clean_build_dirs()
@@ -161,7 +161,7 @@ def build_executable():
         '--noconfirm',
     ])
     
-    print("✅ تم بناء النسخة المستقلة بنجاح!")
+    print("[SUCCESS] Executable built successfully!")
     
     # نسخ الملفات الإضافية
     copy_additional_files()
@@ -181,7 +181,7 @@ def copy_additional_files():
         # إنشاء ملف التحديث
         create_update_info(dist_dir)
         
-        print(f"📁 الملفات جاهزة في: {dist_dir}")
+        print(f"[INFO] Files ready in: {dist_dir}")
 
 def create_user_readme(dist_dir):
     """إنشاء ملف README للمستخدم النهائي"""
@@ -232,31 +232,31 @@ def create_update_info(dist_dir):
         json.dump(update_info, f, ensure_ascii=False, indent=2)
 
 def main():
-    """الدالة الرئيسية"""
-    print(f"🚀 بناء {APP_NAME} - الإصدار {APP_VERSION}")
+    """Main function for building the application"""
+    print(f"Building {APP_NAME} - Version {APP_VERSION}")
     print("=" * 50)
     
     try:
-        # التحقق من وجود PyInstaller
+        # Check if PyInstaller is available
         import PyInstaller
-        print(f"✅ PyInstaller الإصدار: {PyInstaller.__version__}")
+        print(f"[OK] PyInstaller version: {PyInstaller.__version__}")
     except ImportError:
-        print("❌ PyInstaller غير مثبت!")
-        print("قم بتثبيته بالأمر: pip install pyinstaller")
+        print("[ERROR] PyInstaller not installed!")
+        print("Install it with: pip install pyinstaller")
         return
     
-    # التحقق من وجود الملف الرئيسي
+    # Check if main script exists
     if not os.path.exists(MAIN_SCRIPT):
-        print(f"❌ الملف الرئيسي غير موجود: {MAIN_SCRIPT}")
+        print(f"[ERROR] Main script not found: {MAIN_SCRIPT}")
         return
     
-    # بناء التطبيق
+    # Build the application
     build_executable()
     
     print("=" * 50)
-    print("🎉 اكتمل البناء بنجاح!")
-    print(f"📂 ستجد النسخة المستقلة في: dist/{APP_NAME}/")
-    print(f"🚀 شغل الملف: dist/{APP_NAME}/{APP_NAME}.exe")
+    print("[SUCCESS] Build completed successfully!")
+    print(f"[INFO] Executable location: dist/{APP_NAME}/")
+    print(f"[INFO] Run the file: dist/{APP_NAME}/{APP_NAME}.exe")
 
 if __name__ == "__main__":
     main()
