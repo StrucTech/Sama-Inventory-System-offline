@@ -10,6 +10,10 @@ jobs:
   build:
     runs-on: windows-latest
     
+    permissions:
+      contents: write
+      pull-requests: write
+      
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
@@ -97,33 +101,26 @@ jobs:
         
     - name: Create Release and Upload Asset
       uses: softprops/action-gh-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref_name }}
-        name: ${{ steps.release_info.outputs.release_name }}
+        files: ./Sama-Inventory-System-${{ github.ref_name }}.zip
+        name: "Sama Inventory System ${{ github.ref_name }}"
         body: |
           🎉 **نسخة جديدة من نظام إدارة المخزون Sama**
           
-          ## ✨ المميزات الجديدة:
-          - تحسينات في الأداء
-          - إصلاح الأخطاء
-          - ميزات جديدة
-          
-          ## 📦 طريقة التثبيت:
-          1. حمل الملف `Sama-Inventory-System-${{ github.ref_name }}.zip`
-          2. استخرج المحتويات
-          3. شغل `نظام إدارة المخزون.exe`
+          ## 📦 التحميل والتثبيت:
+          1. حمل الملف المضغوط أدناه
+          2. استخرج المحتويات في مجلد جديد
+          3. شغل الملف التنفيذي
           
           ## 🔄 التحديث التلقائي:
-          إذا كان لديك نسخة سابقة، ستحصل على إشعار تحديث تلقائي عند فتح البرنامج.
+          البرنامج سيتحقق من التحديثات تلقائياً عند بدء التشغيل.
           
-          ---
-          الإصدار: ${{ steps.release_info.outputs.version }}
-          تاريخ البناء: ${{ github.event.head_commit.timestamp }}
-        files: ./Sama-Inventory-System-${{ github.ref_name }}.zip
+          **تاريخ الإنشاء:** ${{ github.event.head_commit.timestamp }}
         draft: false
         prerelease: false
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
     # إشعار بنجاح البناء (اختياري)
     - name: Notify Success
