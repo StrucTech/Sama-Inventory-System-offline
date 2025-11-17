@@ -1,0 +1,23 @@
+# أوامر Git لإطلاق الإصدار
+
+# 1. إضافة جميع التغييرات
+git add .
+
+# 2. إنشاء commit للإصدار
+git commit -m "إصدار 1.2.4: تحسينات الواجهة والفلاتر"
+
+# 3. إنشاء tag للإصدار
+git tag v1.2.4
+
+# 4. رفع التغييرات
+git push origin main
+git push origin v1.2.4
+
+# 5. إنشاء Release على GitHub:
+# - اذهب إلى GitHub Repository
+# - اضغط 'Releases' ثم 'Create a new release'
+# - اختر Tag: v1.2.4
+# - العنوان: 'الإصدار 1.2.4 - تحسينات الواجهة والفلاتر'
+# - انسخ محتويات github_release_notes.md
+# - ارفع ملف sama-inventory-v1.2.4.zip
+# - اضغط 'Publish release'

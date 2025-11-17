@@ -1,0 +1,10 @@
+{
+  "current_version": "1.2.4",
+  "github_repo": "StrucTech/Sama-Inventory-System",
+  "update_url": "https://api.github.com/repos/StrucTech/Sama-Inventory-System/releases/latest",
+  "auto_check": true,
+  "check_interval_hours": 24,
+  "last_check": "2025-11-16T19:49:25.953673",
+  "app_name": "SamaInventorySystem",
+  "last_update": "2025-11-17T17:15:00.000000"
+}

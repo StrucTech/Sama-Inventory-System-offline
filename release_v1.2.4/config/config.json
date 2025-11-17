@@ -1,0 +1,23 @@
+{
+    "credentials_file": "config/credentials.json",
+    "spreadsheet_name": "Inventory Management",
+    "worksheet_name": "Inventory",
+    "users_sheet": "Users",
+    "activity_log_sheet": "Activity_Log",
+    "google_scopes": [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ],
+    "columns": {
+        "item_name": "A",
+        "quantity": "B",
+        "unit_price": "C",
+        "total_value": "D",
+        "last_updated": "E"
+    },
+    "window": {
+        "width": 1000,
+        "height": 700
+    },
+    "theme": "luxury"
+}

@@ -1,0 +1,29 @@
+{
+  "timestamp": "2025-11-16T20:38:26.324623",
+  "overall_health": 100.0,
+  "status": "healthy",
+  "details": {
+    "files": {
+      "status": "ok",
+      "message": "جميع الملفات موجودة",
+      "missing_count": 0
+    },
+    "config": {
+      "status": "ok",
+      "message": "الإعدادات سليمة"
+    },
+    "memory": {
+      "status": "ok",
+      "message": "استخدام ذاكرة طبيعي: 63.9%",
+      "memory_percent": 63.9
+    },
+    "logs": {
+      "status": "ok",
+      "message": "ملفات السجلات بحجم طبيعي"
+    },
+    "permissions": {
+      "status": "ok",
+      "message": "الصلاحيات سليمة"
+    }
+  }
+}
