@@ -18,24 +18,72 @@ env/
 *.swp
 *.swo
 
+# 🚨 SENSITIVE FILES - NEVER COMMIT 🚨
 # Google Sheets credentials
 credentials.json
 service-account-*.json
+*-credentials.json
+*_credentials.json
 
 # Config files with sensitive data
 config/credentials.json
+config/credentials_*.json
+config/service-account*.json
 
-# Logs
+# Any backup credentials
+**/credentials*.json
+**/service-account*.json
+**/google-credentials*.json
+credentials_backup_*.json
+
+# User data and sessions
+config/user_sessions.json
+config/active_users.json
+
+# Test credentials
+test_credentials.json
+demo_credentials.json
+
+# Logs with potentially sensitive data
 *.log
 logs/
+debug_*.log
+error_*.log
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Testing
+# Testing files that might contain data
 test_*.json
 *_test.json
 final_assessment_report.json
 production_decision.json
 test_report_*.json
+
+# Temporary and cache files
+temp/
+tmp/
+cache/
+*.tmp
+*.cache
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.development
+
+# Backup files
+*.backup
+*.bak
+backup_*/
+
+# Distribution packages (contain sensitive files)
+sama-inventory-*.zip
+release_v*/

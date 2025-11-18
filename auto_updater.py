@@ -24,7 +24,7 @@ class AutoUpdater:
         self.config_file = config_file
         self.current_version = None
         self.update_url = None
-        self.check_interval = 24  # ساعة
+        self.check_interval = 0  # فحص في كل مرة (0 = دائماً)
         self.auto_update = True
         self.load_config()
         
@@ -36,7 +36,7 @@ class AutoUpdater:
                     config = json.load(f)
                     self.current_version = config.get('current_version', '1.0.0')
                     self.update_url = config.get('update_url', '')
-                    self.check_interval = config.get('check_interval', 24)
+                    self.check_interval = config.get('check_interval', 0)
                     self.auto_update = config.get('auto_update', True)
             else:
                 # إنشاء ملف إعدادات افتراضي
@@ -50,7 +50,7 @@ class AutoUpdater:
         default_config = {
             "current_version": "1.0.0",
             "update_url": "https://github.com/your-repo/releases/latest",  # غيّر هذا
-            "check_interval": 24,
+            "check_interval": 0,
             "auto_update": True,
             "last_check": ""
         }
@@ -64,8 +64,14 @@ class AutoUpdater:
     
     def should_check_for_updates(self):
         """التحقق من ضرورة فحص التحديثات"""
-        if not self.auto_update:
+        # الوضع اليدوي: عدم فحص تلقائي
+        if not self.auto_update or self.check_interval == -1:
             return False
+        
+        # الفحص الدائم: فحص في كل مرة
+        if self.check_interval == 0:
+            print("🔄 فحص التحديثات في كل مرة يفتح البرنامج...")
+            return True
             
         try:
             with open(self.config_file, 'r', encoding='utf-8') as f:
@@ -73,12 +79,21 @@ class AutoUpdater:
                 last_check = config.get('last_check', '')
                 
             if not last_check:
+                print("🔄 أول فحص للتحديثات...")
                 return True
                 
             last_check_date = datetime.fromisoformat(last_check)
             time_diff = datetime.now() - last_check_date
+            hours_passed = time_diff.total_seconds() / 3600
             
-            return time_diff.total_seconds() > (self.check_interval * 3600)
+            should_check = hours_passed > self.check_interval
+            
+            if should_check:
+                print(f"🔄 فحص التحديثات (مضى {hours_passed:.1f} ساعة من آخر فحص)...")
+            else:
+                print(f"⏱️ لا حاجة للفحص بعد (مضى {hours_passed:.1f} ساعة، مطلوب {self.check_interval} ساعة)")
+            
+            return should_check
             
         except Exception as e:
             print(f"خطأ في التحقق من تاريخ آخر فحص: {e}")
@@ -275,6 +290,72 @@ class AutoUpdater:
         except Exception as e:
             print(f"خطأ في استعادة النسخة الاحتياطية: {e}")
     
+    def set_check_mode(self, mode="always"):
+        """
+        تحديد نوع فحص التحديثات
+        
+        الأوضاع المتاحة:
+        - 'always': فحص في كل مرة يفتح البرنامج (الافتراضي الجديد)
+        - 'daily': فحص يومياً (24 ساعة)
+        - 'weekly': فحص أسبوعياً (168 ساعة)
+        - 'manual': فحص يدوي فقط
+        """
+        check_intervals = {
+            'always': 0,        # فحص دائماً
+            'daily': 24,        # يومياً
+            'weekly': 168,      # أسبوعياً
+            'manual': -1        # يدوي فقط
+        }
+        
+        if mode not in check_intervals:
+            print(f"⚠️ وضع غير صحيح: {mode}. الأوضاع المتاحة: {list(check_intervals.keys())}")
+            return False
+        
+        self.check_interval = check_intervals[mode]
+        self.auto_update = (mode != 'manual')
+        
+        # حفظ الإعدادات الجديدة
+        try:
+            if os.path.exists(self.config_file):
+                with open(self.config_file, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+            else:
+                config = {}
+            
+            config['check_interval'] = self.check_interval
+            config['auto_update'] = self.auto_update
+            config['check_mode'] = mode
+            
+            with open(self.config_file, 'w', encoding='utf-8') as f:
+                json.dump(config, f, ensure_ascii=False, indent=2)
+                
+            mode_names = {
+                'always': 'في كل مرة يفتح البرنامج',
+                'daily': 'يومياً (كل 24 ساعة)',
+                'weekly': 'أسبوعياً (كل أسبوع)',
+                'manual': 'يدوياً فقط'
+            }
+            
+            print(f"✅ تم تحديد وضع فحص التحديثات إلى: {mode_names[mode]}")
+            return True
+            
+        except Exception as e:
+            print(f"❌ خطأ في حفظ إعدادات الفحص: {e}")
+            return False
+    
+    def get_check_mode_info(self):
+        """الحصول على معلومات وضع الفحص الحالي"""
+        if self.check_interval == 0:
+            return "في كل مرة يفتح البرنامج"
+        elif self.check_interval == 24:
+            return "يومياً (كل 24 ساعة)"
+        elif self.check_interval == 168:
+            return "أسبوعياً (كل أسبوع)"
+        elif self.check_interval == -1 or not self.auto_update:
+            return "يدوياً فقط"
+        else:
+            return f"كل {self.check_interval} ساعة"
+
     def update_last_check_date(self):
         """تحديث تاريخ آخر فحص"""
         try:
