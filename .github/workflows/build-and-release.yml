@@ -26,22 +26,20 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements_build.txt
+        pip install -r requirements.txt
         
     - name: Check Files Before Build
       run: |
-        echo "📁 Checking project files..."
+        echo "Checking project files..."
         dir
-        echo "🔍 Looking for main file..."
-        if (Test-Path "main_with_auth.py") { echo "✅ main_with_auth.py found" } else { echo "❌ main_with_auth.py missing" }
-        if (Test-Path "requirements_build.txt") { echo "✅ requirements_build.txt found" } else { echo "❌ requirements_build.txt missing" }
-        if (Test-Path "build_setup.py") { echo "✅ build_setup.py found" } else { echo "❌ build_setup.py missing" }
+        echo "Looking for main files..."
+        if (Test-Path "main.py") { echo "[OK] main.py found" } else { echo "[ERROR] main.py missing" }
+        if (Test-Path "requirements.txt") { echo "[OK] requirements.txt found" } else { echo "[ERROR] requirements.txt missing" }
+        if (Test-Path "build_exe.py") { echo "[OK] build_exe.py found" } else { echo "[ERROR] build_exe.py missing" }
         
     - name: Build Executable
       run: |
-        $env:PYTHONIOENCODING="utf-8"
-        $env:PYTHONUTF8=1
-        python build_setup.py
+        python build_exe.py
         
     - name: Check Build Output
       run: |
@@ -58,35 +56,14 @@ jobs:
           exit 1
         }
         
-    - name: Create ZIP Archive
+    - name: Check EXE Files
       run: |
-        echo "Creating ZIP archive..."
-        $distFolders = Get-ChildItem -Path "dist" -Directory
-        
-        if ($distFolders.Count -eq 0) {
-          echo "[ERROR] No folders found in dist!"
-          echo "Checking for .exe files directly in dist:"
-          Get-ChildItem -Path "dist" -Filter "*.exe"
-          exit 1
-        }
-        
-        $targetFolder = $distFolders[0].Name
-        echo "[INFO] Using folder: $targetFolder"
-        
-        if (Test-Path "dist/$targetFolder") {
-          echo "[OK] Creating ZIP from dist/$targetFolder"
-          7z a -tzip "Sama-Inventory-System-${{ github.ref_name }}.zip" "dist/$targetFolder/*"
-          
-          # Check if ZIP was created successfully
-          if (Test-Path "Sama-Inventory-System-${{ github.ref_name }}.zip") {
-            $zipSize = (Get-Item "Sama-Inventory-System-${{ github.ref_name }}.zip").Length
-            echo "[SUCCESS] ZIP created successfully - Size: $zipSize bytes"
-          } else {
-            echo "[ERROR] ZIP file was not created!"
-            exit 1
-          }
+        echo "Checking for EXE files..."
+        if (Test-Path "dist") {
+          echo "[OK] dist folder exists"
+          Get-ChildItem -Path "dist" -Filter "*.exe" | ForEach-Object { echo "  Found: $($_.Name) ($($_.Length) bytes)" }
         } else {
-          echo "[ERROR] Folder dist/$targetFolder not accessible!"
+          echo "[ERROR] dist folder not found!"
           exit 1
         }
         
@@ -99,32 +76,27 @@ jobs:
           echo "release_name=Sama Inventory System v$version" >> $env:GITHUB_OUTPUT
         }
         
-    - name: Create Release and Upload Asset
+    - name: Create Release and Upload EXE Files
       uses: softprops/action-gh-release@v1
       with:
-        files: ./Sama-Inventory-System-${{ github.ref_name }}.zip
+        files: dist/*.exe
         name: "Sama Inventory System ${{ github.ref_name }}"
         body: |
-          🎉 **نسخة جديدة من نظام إدارة المخزون Sama**
+          Release v${{ github.ref_name }}
           
-          ## 📦 التحميل والتثبيت:
-          1. حمل الملف المضغوط أدناه
-          2. استخرج المحتويات في مجلد جديد
-          3. شغل الملف التنفيذي
+          EXE files included:
+          - SamaInventorySystem.exe (Main Application)
+          - SamaReportViewer.exe (Advanced Report Viewer)
           
-          ## 🔄 التحديث التلقائي:
-          البرنامج سيتحقق من التحديثات تلقائياً عند بدء التشغيل.
-          
-          **تاريخ الإنشاء:** ${{ github.event.head_commit.timestamp }}
+          Download the EXE files above and run directly.
         draft: false
         prerelease: false
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
-    # إشعار بنجاح البناء (اختياري)
     - name: Notify Success
       if: success()
       run: |
-        echo "✅ تم بناء ونشر الإصدار ${{ github.ref_name }} بنجاح!"
-        echo "🔗 الرابط: https://github.com/StrucTech/Sama-Inventory-System/releases/tag/${{ github.ref_name }}"
+        echo "[SUCCESS] Build and release complete!"
+        echo "[INFO] URL: https://github.com/StrucTech/Sama-Inventory-System-offline/releases/tag/${{ github.ref_name }}"

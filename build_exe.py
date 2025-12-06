@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-سكريبت بناء ملفات EXE باستخدام PyInstaller
-يبني البرنامجين: main.py و advanced_report_viewer.py
+Build script for creating EXE files using PyInstaller
+Builds both applications: main.py and advanced_report_viewer.py
 """
 
 import os
@@ -10,30 +10,30 @@ import sys
 from pathlib import Path
 
 def build_exe_for_file(python_file, app_name):
-    """بناء ملف EXE واحد"""
-    print(f"\n🔨 جاري بناء ملف {app_name}...")
+    """Build a single EXE file"""
+    print(f"\nBuilding {app_name}...")
     
-    # التأكد من تثبيت PyInstaller
+    # Ensure PyInstaller is installed
     try:
         import PyInstaller
     except ImportError:
-        print("📦 تثبيت PyInstaller...")
+        print(f"Installing PyInstaller...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", "PyInstaller"])
     
-    # مسار المشروع
+    # Project path
     project_dir = Path(__file__).parent
     main_file = project_dir / python_file
     
     if not main_file.exists():
-        print(f"❌ الملف {python_file} غير موجود!")
+        print(f"ERROR: {python_file} not found!")
         return False
     
-    # الأيقونة (اختياري)
+    # Icon (optional)
     icon_path = None
     if (project_dir / "icon.ico").exists():
         icon_path = str(project_dir / "icon.ico")
     
-    # أوامر PyInstaller
+    # PyInstaller command
     cmd = [
         sys.executable,
         "-m",
@@ -52,28 +52,28 @@ def build_exe_for_file(python_file, app_name):
         str(main_file)
     ]
     
-    # إضافة الأيقونة إذا كانت موجودة
+    # Add icon if exists
     if icon_path:
         cmd.insert(-1, f"--icon={icon_path}")
     
-    # تشغيل البناء
+    # Run build
     try:
         subprocess.run(cmd, check=True)
-        print(f"✅ تم بناء {app_name}.exe بنجاح!")
+        print(f"SUCCESS: {app_name}.exe built successfully!")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"❌ خطأ في بناء {app_name}: {e}")
+        print(f"ERROR building {app_name}: {e}")
         return False
 
 def main():
-    """بناء جميع البرامج"""
-    print("\n" + "="*50)
-    print("🚀 بناء تطبيقات Sama Inventory System")
-    print("="*50)
+    """Build all applications"""
+    print("\n" + "="*60)
+    print("Building Sama Inventory System Applications")
+    print("="*60)
     
     project_dir = Path(__file__).parent
     
-    # البرامج المراد بناؤها
+    # Applications to build
     apps = [
         ("main.py", "SamaInventorySystem"),
         ("advanced_report_viewer.py", "SamaReportViewer")
@@ -81,28 +81,28 @@ def main():
     
     results = {}
     
-    # بناء كل برنامج
+    # Build each application
     for py_file, app_name in apps:
         results[app_name] = build_exe_for_file(py_file, app_name)
     
-    # ملخص النتائج
-    print("\n" + "="*50)
-    print("📊 ملخص البناء:")
-    print("="*50)
+    # Summary
+    print("\n" + "="*60)
+    print("Build Summary:")
+    print("="*60)
     
     for app_name, success in results.items():
-        status = "✅ نجح" if success else "❌ فشل"
+        status = "SUCCESS" if success else "FAILED"
         print(f"{app_name}: {status}")
     
-    print(f"\n📁 الملفات موجودة في: {project_dir}/dist/")
-    print("\nملفات البناء:")
+    print(f"\nOutput directory: {project_dir}/dist/")
+    print("\nBuilt files:")
     for py_file, app_name in apps:
         exe_path = project_dir / "dist" / f"{app_name}.exe"
         if exe_path.exists():
             size_mb = exe_path.stat().st_size / (1024 * 1024)
-            print(f"  • {app_name}.exe ({size_mb:.2f} MB)")
+            print(f"  - {app_name}.exe ({size_mb:.2f} MB)")
     
-    # العودة بكود الخروج
+    # Return exit code
     success = all(results.values())
     print()
     return 0 if success else 1
