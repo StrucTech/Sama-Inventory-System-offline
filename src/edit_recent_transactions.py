@@ -783,54 +783,18 @@ class EditRecentTransactionsDialog(QDialog):
     def apply_modification(self, original_transaction, new_quantity, difference):
         """تطبيق التعديل على المعاملة الفردية"""
         try:
-            # 1. تسجيل التعديل في ملف منفصل
+            # 1. تسجيل التعديل في ملف منفصل (للتوثيق فقط)
             self.log_modification(original_transaction, new_quantity, difference)
             
-            # 2. تسجيل معاملة التعديل (بدون حذف الأصلية)
-            self.record_modification_transaction(original_transaction, difference)
-            
-            # 3. تحديث المعاملة الأصلية بالكمية الجديدة
-            self.add_corrected_individual_transaction(original_transaction, new_quantity)
+            # 2. تحديث المعاملة الأصلية بالكمية الجديدة (لا نضيف معاملات تعديل)
+            self.update_original_transaction(original_transaction, new_quantity)
             
             return True
             
         except Exception as e:
             raise e
     
-    def record_modification_transaction(self, original_transaction, difference):
-        """تسجيل معاملة التعديل في السجل (تعديل زيادة أو تعديل نقص)"""
-        try:
-            # تحديد نوع التعديل بناءً على الفرق
-            if difference > 0:
-                modification_type = 'تعديل زيادة'
-            else:
-                modification_type = 'تعديل نقص'
-            
-            # الحصول على رقم المعاملة المرجعية
-            reference_id = original_transaction.get('رقم_المعاملة', None)
-            
-            # الحصول على التاريخ
-            original_date = original_transaction['التاريخ']
-            if isinstance(original_date, str):
-                custom_date = original_date
-            else:
-                custom_date = original_date.strftime('%Y-%m-%d %H:%M:%S')
-            
-            # تسجيل معاملة التعديل مع نقل معلومات العنصر الكاملة (بما فيها الصلاحية)
-            excel_manager.record_transaction(
-                self.project_name,
-                original_transaction['اسم_العنصر'],
-                abs(difference),  # قيمة التعديل (موجبة دائماً)
-                modification_type,  # نوع التعديل (زيادة أو نقص)
-                f'{self.reason_combo.currentText()}',
-                custom_date=custom_date,
-                reference_id=reference_id,
-                category=original_transaction['التصنيف'],
-                item_details=original_transaction  # نقل معلومات العنصر بما فيها الصلاحية
-            )
-            
-        except Exception as e:
-            raise Exception(f"خطأ في تسجيل معاملة التعديل: {str(e)}")
+
     
     def log_modification(self, original_transaction, new_quantity, difference):
         """تسجيل التعديل في ملف منفصل"""
@@ -867,10 +831,9 @@ class EditRecentTransactionsDialog(QDialog):
             raise Exception(f"خطأ في تسجيل التعديل: {str(e)}")
     
 
-    def add_corrected_individual_transaction(self, original_transaction, new_quantity):
-        """تحديث المعاملة الأصلية بالكمية الجديدة (بدون إضافة معاملة جديدة)"""
+    def update_original_transaction(self, original_transaction, new_quantity):
+        """تحديث المعاملة الأصلية بالكمية الجديدة (بدون إضافة معاملات تعديل)"""
         try:
-            # بدلاً من إضافة معاملة جديدة، نحدث المعاملة الأصلية مباشرة في السجل
             project_file = os.path.join("projects", f"{self.project_name}_Transactions.xlsx")
             
             if not os.path.exists(project_file):
@@ -879,46 +842,57 @@ class EditRecentTransactionsDialog(QDialog):
             # قراءة ملف المعاملات
             transactions_df = pd.read_excel(project_file, engine='openpyxl')
             
-            # البحث عن المعاملة الأصلية بناءً على التفاصيل
-            original_date = original_transaction['التاريخ']
-            if isinstance(original_date, str):
-                search_date = original_date
-            else:
-                search_date = original_date.strftime('%Y-%m-%d %H:%M:%S')
+            # البحث عن المعاملة باستخدام رقم المعاملة (الطريقة الأكثر دقة)
+            transaction_id = original_transaction.get('رقم_المعاملة', None)
             
-            # إيجاد الصف المطابق
-            mask = (
-                (transactions_df['التاريخ'].astype(str).str.contains(search_date[:10], na=False)) &
-                (transactions_df['اسم_العنصر'] == original_transaction['اسم_العنصر']) &
-                (transactions_df['الكمية'] == original_transaction['الكمية']) &
-                (transactions_df['نوع_العملية'] == original_transaction['نوع_العملية'])
-            )
+            if transaction_id is not None:
+                # البحث باستخدام رقم المعاملة (الأفضل)
+                mask = transactions_df['رقم_المعاملة'] == transaction_id
+            else:
+                # البحث باستخدام التفاصيل كبديل
+                original_date = original_transaction['التاريخ']
+                if isinstance(original_date, str):
+                    search_date = original_date
+                else:
+                    search_date = original_date.strftime('%Y-%m-%d %H:%M:%S')
+                
+                # إيجاد الصف المطابق بناءً على التاريخ والعنصر والنوع والكمية القديمة
+                mask = (
+                    (transactions_df['التاريخ'].astype(str).str.contains(search_date[:10], na=False)) &
+                    (transactions_df['اسم_العنصر'] == original_transaction['اسم_العنصر']) &
+                    (transactions_df['الكمية'] == original_transaction['الكمية']) &
+                    (transactions_df['نوع_العملية'] == original_transaction['نوع_العملية'])
+                )
             
             matching_rows = transactions_df[mask]
             
             if matching_rows.empty:
-                raise Exception("لم يتم العثور على المعاملة المراد تحديثها")
+                raise Exception(f"لم يتم العثور على المعاملة المراد تحديثها (رقم المعاملة: {transaction_id})")
             
-            # تحديث الكمية للمعاملة الأولى المطابقة
+            # تحديث أول صف مطابق
             first_match_idx = matching_rows.index[0]
+            
+            # تحديث الكمية
             transactions_df.at[first_match_idx, 'الكمية'] = new_quantity
             
-            # محاولة تحديث الصلاحية إذا كانت موجودة في المعاملة الأصلية
-            if 'أيام_الصلاحية' in original_transaction and pd.notna(original_transaction['أيام_الصلاحية']):
-                if 'أيام_الصلاحية' in transactions_df.columns:
-                    transactions_df.at[first_match_idx, 'أيام_الصلاحية'] = original_transaction['أيام_الصلاحية']
+            # تحديث الصلاحية إذا كانت موجودة
+            shelf_life_cols = ['أيام_الصلاحية', 'مدة_الصلاحية_بالأيام', 'مدة الصلاحية (أيام)']
+            for col in shelf_life_cols:
+                if col in original_transaction and pd.notna(original_transaction[col]):
+                    if col in transactions_df.columns:
+                        transactions_df.at[first_match_idx, col] = original_transaction[col]
+                        break
             
-            # تحديث الملاحظات بإضافة ملاحظة التعديل
-            existing_notes = str(transactions_df.at[first_match_idx, 'ملاحظات']) if 'ملاحظات' in transactions_df.columns else ""
-            if existing_notes and existing_notes != 'nan':
-                new_notes = f"{existing_notes} | تم التعديل: {self.reason_combo.currentText()}"
-            else:
-                new_notes = f"تم التعديل: {self.reason_combo.currentText()}"
-            
+            # تحديث الملاحظات
             if 'ملاحظات' in transactions_df.columns:
+                existing_notes = str(transactions_df.at[first_match_idx, 'ملاحظات'])
+                if existing_notes and existing_notes != 'nan':
+                    new_notes = f"{existing_notes} | تم التعديل: {self.reason_combo.currentText()}"
+                else:
+                    new_notes = f"تم التعديل: {self.reason_combo.currentText()}"
                 transactions_df.at[first_match_idx, 'ملاحظات'] = new_notes
             
-            # حفظ التغييرات
+            # حفظ الملف المحدث
             transactions_df.to_excel(project_file, index=False, engine='openpyxl')
             
         except Exception as e:
