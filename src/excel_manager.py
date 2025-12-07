@@ -213,20 +213,24 @@ class ExcelManager:
             print(f"خطأ في إضافة الحركة: {e}")
             return False
     
-    def record_transaction(self, project_name, item_name, quantity, operation_type, notes="", custom_date=None, reference_id=None, category=None):
-        """تسجيل معاملة مع إمكانية تحديد التاريخ والتصنيف"""
+    def record_transaction(self, project_name, item_name, quantity, operation_type, notes="", custom_date=None, reference_id=None, category=None, item_details=None):
+        """تسجيل معاملة مع إمكانية تحديد التاريخ والتصنيف وتفاصيل العنصر"""
         try:
             project_file = self.create_site_transactions_file(project_name)
             
-            # الحصول على معلومات العنصر
-            item_info = self.get_item_info(item_name)
-            if not item_info:
-                # إنشاء معلومات افتراضية إذا لم توجد
-                item_info = {
-                    'اسم العنصر': item_name,
-                    'التصنيف': 'غير محدد',
-                    'مدة الصلاحية (أيام)': None
-                }
+            # إذا تم توفير تفاصيل العنصر (مثل عند التعديل)، استخدمها
+            if item_details is not None:
+                item_info = item_details
+            else:
+                # الحصول على معلومات العنصر من قاعدة البيانات
+                item_info = self.get_item_info(item_name)
+                if not item_info:
+                    # إنشاء معلومات افتراضية إذا لم توجد
+                    item_info = {
+                        'اسم العنصر': item_name,
+                        'التصنيف': 'غير محدد',
+                        'مدة الصلاحية (أيام)': None
+                    }
             
             # قراءة الملف الحالي
             try:
@@ -245,11 +249,14 @@ class ExcelManager:
                 transaction_date = datetime.strptime(transaction_date, '%Y-%m-%d %H:%M:%S')
             
             # إعداد بيانات المعاملة
-            shelf_life = item_info.get('مدة الصلاحية (أيام)', None)
-            if shelf_life is not None and pd.notna(shelf_life):
-                shelf_life = int(shelf_life)
-            else:
-                shelf_life = None
+            # محاولة الحصول على الصلاحية من أسماء أعمدة مختلفة
+            shelf_life = None
+            for key in ['مدة الصلاحية (أيام)', 'أيام_الصلاحية', 'مدة_الصلاحية_بالأيام', 'مدة الصلاحية']:
+                if key in item_info:
+                    shelf_life = item_info.get(key, None)
+                    if shelf_life is not None and pd.notna(shelf_life):
+                        shelf_life = int(shelf_life) if shelf_life else None
+                    break
                 
             # توليد رقم المعاملة
             transaction_id = self.generate_transaction_id(project_name)
