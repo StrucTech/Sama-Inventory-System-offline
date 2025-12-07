@@ -883,13 +883,16 @@ class EditRecentTransactionsDialog(QDialog):
                         transactions_df.at[first_match_idx, col] = original_transaction[col]
                         break
             
-            # تحديث الملاحظات
+            # تحديث الملاحظات مع إضافة الكمية القديمة
             if 'ملاحظات' in transactions_df.columns:
+                old_quantity = int(original_transaction['الكمية'])
+                modification_note = f"تم التعديل: {self.reason_combo.currentText()} ({old_quantity})"
+                
                 existing_notes = str(transactions_df.at[first_match_idx, 'ملاحظات'])
                 if existing_notes and existing_notes != 'nan':
-                    new_notes = f"{existing_notes} | تم التعديل: {self.reason_combo.currentText()}"
+                    new_notes = f"{existing_notes} | {modification_note}"
                 else:
-                    new_notes = f"تم التعديل: {self.reason_combo.currentText()}"
+                    new_notes = modification_note
                 transactions_df.at[first_match_idx, 'ملاحظات'] = new_notes
             
             # حفظ الملف المحدث
