@@ -39,11 +39,11 @@ def build_exe_for_file(python_file, app_name):
         "-m",
         "PyInstaller",
         f"--name={app_name}",
-        "--onefile",  # ملف واحد
+        "--onefile",
         f"--distpath={project_dir}/dist",
-        f"--buildpath={project_dir}/build_{app_name}",
+        f"--workpath={project_dir}/build_{app_name}",
         f"--specpath={project_dir}/specs",
-        "--console",  # إظهار console
+        "--console",
         "--noupx",
         "--hidden-import=PyQt6",
         "--hidden-import=pandas",
