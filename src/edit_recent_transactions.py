@@ -35,14 +35,23 @@ class EditRecentTransactionsDialog(QDialog):
         """إعداد واجهة المستخدم"""
         self.setWindowTitle(f"تعديل المعاملات الحديثة - {self.project_name}")
         self.setModal(True)
-        self.resize(1000, 600)
+        
+        # الحصول على حجم الشاشة وضبط حجم النافذة بناءً عليها
+        from PyQt6.QtWidgets import QApplication
+        screen = QApplication.primaryScreen().geometry()
+        
+        # جعل النافذة تأخذ 85% من عرض الشاشة و 90% من ارتفاعها
+        window_width = int(screen.width() * 0.85)
+        window_height = int(screen.height() * 0.90)
+        
+        self.resize(window_width, window_height)
         self.center_on_screen()
         self.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         
         # التخطيط الرئيسي
         main_layout = QVBoxLayout(self)
-        main_layout.setSpacing(20)
-        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setSpacing(10)
+        main_layout.setContentsMargins(15, 15, 15, 15)
         
         # العنوان والتوضيح
         title_label = QLabel("تعديل المعاملات الحديثة (آخر 24 ساعة)")
@@ -53,13 +62,16 @@ class EditRecentTransactionsDialog(QDialog):
         info_label = QLabel("يمكنك تعديل الكميات المدخلة خلال آخر 24 ساعة فقط\nقيود الحماية من المخزون السالب:\n• لا يمكن تعديل معاملات الدخول إذا تمت عمليات إخراج بعدها\n• لا يمكن زيادة كمية الخروج لتتجاوز المخزون المتاح")
         info_label.setObjectName("info")
         info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        info_label.setMaximumHeight(70)
         main_layout.addWidget(info_label)
         
         # أزرار التحكم
         controls_layout = QHBoxLayout()
+        controls_layout.setSpacing(10)
         
         refresh_btn = QPushButton("تحديث القائمة")
         refresh_btn.setObjectName("control_button")
+        refresh_btn.setMaximumWidth(120)
         refresh_btn.clicked.connect(self.load_recent_transactions)
         controls_layout.addWidget(refresh_btn)
         
@@ -69,12 +81,15 @@ class EditRecentTransactionsDialog(QDialog):
         # جدول المعاملات الحديثة
         transactions_group = QGroupBox("المعاملات القابلة للتعديل")
         transactions_layout = QVBoxLayout(transactions_group)
+        transactions_layout.setContentsMargins(10, 10, 10, 10)
+        transactions_layout.setSpacing(5)
         
         self.transactions_table = QTableWidget()
         self.transactions_table.setObjectName("transactions_table")
         self.transactions_table.setSortingEnabled(True)
         self.transactions_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.transactions_table.setAlternatingRowColors(True)
+        self.transactions_table.setMinimumHeight(300)
         
         # أعمدة الجدول
         columns = ['رقم المعاملة', 'التاريخ', 'العنصر', 'التصنيف', 'نوع العملية', 'كمية المعاملة', 
@@ -93,12 +108,18 @@ class EditRecentTransactionsDialog(QDialog):
         header.setSectionResizeMode(6, QHeaderView.ResizeMode.ResizeToContents)  # الوقت المتبقي
         header.setSectionResizeMode(7, QHeaderView.ResizeMode.ResizeToContents)  # حالة التعديل
         
+        # ضبط ارتفاع الصفوف
+        header.setStretchLastSection(False)
+        self.transactions_table.verticalHeader().setDefaultSectionSize(35)
+        
         transactions_layout.addWidget(self.transactions_table)
-        main_layout.addWidget(transactions_group)
+        main_layout.addWidget(transactions_group, 3)  # 3x stretch factor للجدول
         
         # منطقة التعديل
         edit_group = QGroupBox("تعديل الكمية المختارة")
         edit_layout = QFormLayout(edit_group)
+        edit_layout.setContentsMargins(10, 10, 10, 10)
+        edit_layout.setSpacing(8)
         
         # عرض معلومات المعاملة المختارة
         self.selected_item_label = QLabel("لم يتم اختيار معاملة")
@@ -138,12 +159,12 @@ class EditRecentTransactionsDialog(QDialog):
         # ملاحظات إضافية
         self.notes_text = QTextEdit()
         self.notes_text.setObjectName("notes_text")
-        self.notes_text.setMaximumHeight(60)
+        self.notes_text.setMaximumHeight(50)
         self.notes_text.setEnabled(False)
         self.notes_text.setPlaceholderText("ملاحظات إضافية (اختياري)")
         edit_layout.addRow("ملاحظات:", self.notes_text)
         
-        main_layout.addWidget(edit_group)
+        main_layout.addWidget(edit_group, 1)  # 1x stretch factor لمنطقة التعديل
         
         # الأزرار
         buttons_layout = QHBoxLayout()
@@ -932,12 +953,24 @@ class EditRecentTransactionsDialog(QDialog):
             font-size: 11px;
             color: #1a252f;
             font-weight: bold;
+            selection-background-color: #2980b9;
+        }
+        
+        QTableWidget#transactions_table QHeaderView::section {
+            background-color: #34495e;
+            color: white;
+            padding: 10px;
+            border: 1px solid #2c3e50;
+            font-weight: bold;
+            font-size: 12px;
+            height: 40px;
         }
         
         QTableWidget#transactions_table::item {
-            padding: 8px;
+            padding: 10px;
             border-bottom: 1px solid #bdc3c7;
             color: #1a252f;
+            height: 35px;
         }
         
         QTableWidget#transactions_table::item:selected {
