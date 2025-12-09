@@ -11,13 +11,15 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from excel_manager import excel_manager
 import pandas as pd
+import os
 
 
 class ItemsManager(QDialog):
     """واجهة إنشاء عنصر جديد"""
     
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, project_name=None):
         super().__init__(parent)
+        self.project_name = project_name
         self.items_data = pd.DataFrame()
         self.setup_ui()
         self.setup_styles()
@@ -435,16 +437,11 @@ class ItemsManager(QDialog):
         QApplication.instance().setStyleSheet(QApplication.instance().styleSheet() + message_style)
     
     def load_categories(self):
-        """تحميل التصنيفات الموجودة في ComboBox"""
+        """تحميل التصنيفات الموجودة في ComboBox من المشروع"""
         try:
-            df = pd.read_excel(excel_manager.master_items_file, engine='openpyxl')
+            categories = excel_manager.get_all_categories(self.project_name)
             
-            if not df.empty and 'التصنيف' in df.columns:
-                # الحصول على التصنيفات الفريدة
-                categories = df['التصنيف'].unique()
-                categories = [cat for cat in categories if pd.notna(cat)]
-                categories = sorted(categories)
-                
+            if categories:
                 # إضافة التصنيفات إلى ComboBox
                 self.category_combo.addItems(categories)
                 
@@ -452,9 +449,9 @@ class ItemsManager(QDialog):
             print(f"تحذير: خطأ في تحميل التصنيفات: {str(e)}")
     
     def load_items_data(self):
-        """تحميل بيانات العناصر"""
+        """تحميل بيانات العناصر من المشروع"""
         try:
-            df = pd.read_excel(excel_manager.master_items_file, engine='openpyxl')
+            df = excel_manager.get_all_items(self.project_name)
             self.items_data = df
             self.display_items_data()
             
@@ -522,7 +519,7 @@ class ItemsManager(QDialog):
         return True
     
     def add_new_item(self):
-        """إضافة عنصر جديد"""
+        """إضافة عنصر جديد إلى المشروع"""
         if not self.validate_new_item_inputs():
             return
         
@@ -543,8 +540,8 @@ class ItemsManager(QDialog):
             
             description = self.description_edit.toPlainText().strip()
             
-            # إضافة العنصر
-            new_id = excel_manager.add_new_item(item_name, category, shelf_life, description)
+            # إضافة العنصر للمشروع
+            new_id = excel_manager.add_new_item(item_name, category, shelf_life, description, self.project_name)
             
             if new_id:
                 QMessageBox.information(
@@ -572,7 +569,7 @@ class ItemsManager(QDialog):
         self.description_edit.clear()
     
     def delete_selected_item(self):
-        """حذف العنصر المحدد"""
+        """حذف العنصر المحدد من المشروع"""
         current_row = self.items_table.currentRow()
         
         if current_row < 0:
@@ -586,19 +583,21 @@ class ItemsManager(QDialog):
         # تأكيد الحذف
         reply = QMessageBox.question(
             self, "تأكيد الحذف",
-            f"هل تريد حذف العنصر '{item_name}' (ID: {item_id})؟\n\n"
-            "تحذير: سيؤثر هذا على جميع الحركات المرتبطة بهذا العنصر",
+            f"هل تريد حذف العنصر '{item_name}' (ID: {item_id}) من المشروع الحالي فقط؟\n\n"
+            "سيؤثر هذا على الحركات المرتبطة بهذا العنصر في هذا المشروع فقط.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         
         if reply == QMessageBox.StandardButton.Yes:
             try:
-                # حذف من ملف Excel
-                df = pd.read_excel(excel_manager.master_items_file, engine='openpyxl')
-                df = df[df['Item_ID'] != item_id]
-                df.to_excel(excel_manager.master_items_file, index=False, engine='openpyxl')
+                # حذف من ملف العناصر الخاص بالمشروع
+                items_file = excel_manager.get_project_items_file(self.project_name)
+                if os.path.exists(items_file):
+                    df = pd.read_excel(items_file, engine='openpyxl')
+                    df = df[df['Item_ID'] != item_id]
+                    df.to_excel(items_file, index=False, engine='openpyxl')
                 
-                QMessageBox.information(self, "نجح", f"تم حذف العنصر '{item_name}' بنجاح")
+                QMessageBox.information(self, "نجح", f"تم حذف العنصر '{item_name}' من هذا المشروع بنجاح")
                 
                 # تحديث الجدول
                 self.load_items_data()

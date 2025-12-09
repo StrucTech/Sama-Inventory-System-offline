@@ -14,10 +14,41 @@ class ExcelManager:
     
     def __init__(self, base_path="data"):
         self.base_path = base_path
-        self.master_items_file = os.path.join(base_path, "Master_Items.xlsx")
+        self.master_items_file = os.path.join(base_path, "Master_Items.xlsx")  # للتوافق مع الملفات القديمة
+        
+    def get_project_items_file(self, project_name):
+        """الحصول على مسار ملف العناصر الخاص بالمشروع"""
+        if not os.path.exists("projects"):
+            os.makedirs("projects", exist_ok=True)
+        return os.path.join("projects", f"{project_name}_Items.xlsx")
+    
+    def create_project_items_file(self, project_name):
+        """إنشاء ملف العناصر الخاص بالمشروع"""
+        project_items_file = self.get_project_items_file(project_name)
+        
+        if not os.path.exists(project_items_file):
+            # إنشاء DataFrame فارغ مع الأعمدة المطلوبة
+            columns = [
+                'Item_ID',          # رقم تسلسلي
+                'اسم_العنصر',        # اسم العنصر
+                'التصنيف',          # التصنيف
+                'مدة_الصلاحية_بالأيام',  # مدة الصلاحية
+                'وصف'              # وصف العنصر
+            ]
+            
+            df = pd.DataFrame(columns=columns)
+            
+            # إنشاء المجلد إذا لم يكن موجوداً
+            os.makedirs("projects", exist_ok=True)
+            
+            # حفظ الملف
+            df.to_excel(project_items_file, index=False, engine='openpyxl')
+            print(f"تم إنشاء ملف العناصر للمشروع: {project_items_file}")
+        
+        return project_items_file
         
     def create_master_items_file(self):
-        """إنشاء ملف العناصر الأساسي"""
+        """إنشاء ملف العناصر الأساسي (للتوافق مع الملفات القديمة)"""
         if not os.path.exists(self.master_items_file):
             # إنشاء DataFrame فارغ مع الأعمدة المطلوبة
             columns = [
@@ -95,10 +126,19 @@ class ExcelManager:
             
         return project_file
     
-    def get_item_info(self, item_id):
-        """الحصول على معلومات العنصر من ملف العناصر الأساسي"""
+    def get_item_info(self, item_id, project_name=None):
+        """الحصول على معلومات العنصر من ملف العناصر الخاص بالمشروع"""
         try:
-            df = pd.read_excel(self.master_items_file, engine='openpyxl')
+            # إذا لم يتم تحديد المشروع، استخدم الملف الأساسي (للتوافق)
+            if project_name:
+                items_file = self.get_project_items_file(project_name)
+            else:
+                items_file = self.master_items_file
+            
+            if not os.path.exists(items_file):
+                return None
+            
+            df = pd.read_excel(items_file, engine='openpyxl')
             item = df[df['Item_ID'] == item_id]
             
             if not item.empty:
@@ -350,24 +390,44 @@ class ExcelManager:
         except:
             return []
     
-    def get_next_item_id(self):
-        """الحصول على الرقم التسلسلي التالي للعناصر"""
+    def get_next_item_id(self, project_name=None):
+        """الحصول على الرقم التسلسلي التالي للعناصر في المشروع"""
         try:
-            df = pd.read_excel(self.master_items_file, engine='openpyxl')
+            # إذا لم يتم تحديد المشروع، استخدم الملف الأساسي (للتوافق)
+            if project_name:
+                items_file = self.get_project_items_file(project_name)
+            else:
+                items_file = self.master_items_file
+            
+            if not os.path.exists(items_file):
+                return 1
+            
+            df = pd.read_excel(items_file, engine='openpyxl')
             if df.empty:
                 return 1
             return df['Item_ID'].max() + 1
         except:
             return 1
     
-    def add_new_item(self, item_name, category, shelf_life, description):
-        """إضافة عنصر جديد لملف العناصر الأساسي"""
+    def add_new_item(self, item_name, category, shelf_life, description, project_name=None):
+        """إضافة عنصر جديد لملف العناصر الخاص بالمشروع"""
         try:
+            # إذا لم يتم تحديد المشروع، استخدم الملف الأساسي (للتوافق)
+            if project_name:
+                items_file = self.create_project_items_file(project_name)
+            else:
+                items_file = self.master_items_file
+                if not os.path.exists(items_file):
+                    os.makedirs(self.base_path, exist_ok=True)
+            
             # قراءة الملف الحالي
-            df = pd.read_excel(self.master_items_file, engine='openpyxl')
+            if os.path.exists(items_file):
+                df = pd.read_excel(items_file, engine='openpyxl')
+            else:
+                df = pd.DataFrame(columns=['Item_ID', 'اسم_العنصر', 'التصنيف', 'مدة_الصلاحية_بالأيام', 'وصف'])
             
             # الحصول على الرقم التسلسلي التالي
-            new_id = self.get_next_item_id()
+            new_id = self.get_next_item_id(project_name)
             
             # إضافة العنصر الجديد
             new_item = {
@@ -381,7 +441,7 @@ class ExcelManager:
             df = pd.concat([df, pd.DataFrame([new_item])], ignore_index=True)
             
             # حفظ الملف
-            df.to_excel(self.master_items_file, index=False, engine='openpyxl')
+            df.to_excel(items_file, index=False, engine='openpyxl')
             
             return new_id
             
@@ -389,13 +449,20 @@ class ExcelManager:
             print(f"خطأ في إضافة العنصر الجديد: {e}")
             return None
     
-    def get_all_categories(self):
-        """الحصول على جميع التصنيفات المتاحة"""
+    def get_all_categories(self, project_name=None):
+        """الحصول على جميع التصنيفات المتاحة في المشروع"""
         try:
-            if not os.path.exists(self.master_items_file):
-                self.create_master_items_file()
+            # إذا لم يتم تحديد المشروع، استخدم الملف الأساسي (للتوافق)
+            if project_name:
+                items_file = self.get_project_items_file(project_name)
+                if not os.path.exists(items_file):
+                    self.create_project_items_file(project_name)
+            else:
+                items_file = self.master_items_file
+                if not os.path.exists(items_file):
+                    self.create_master_items_file()
             
-            df = pd.read_excel(self.master_items_file, engine='openpyxl')
+            df = pd.read_excel(items_file, engine='openpyxl')
             
             # استخراج التصنيفات الفريدة (بدون القيم الفارغة)
             categories = df['التصنيف'].dropna().unique().tolist()
@@ -409,13 +476,20 @@ class ExcelManager:
             print(f"خطأ في تحميل التصنيفات: {e}")
             return []
     
-    def get_items_by_category(self, category):
-        """الحصول على العناصر حسب التصنيف"""
+    def get_items_by_category(self, category, project_name=None):
+        """الحصول على العناصر حسب التصنيف في المشروع"""
         try:
-            if not os.path.exists(self.master_items_file):
-                self.create_master_items_file()
+            # إذا لم يتم تحديد المشروع، استخدم الملف الأساسي (للتوافق)
+            if project_name:
+                items_file = self.get_project_items_file(project_name)
+                if not os.path.exists(items_file):
+                    self.create_project_items_file(project_name)
+            else:
+                items_file = self.master_items_file
+                if not os.path.exists(items_file):
+                    self.create_master_items_file()
             
-            df = pd.read_excel(self.master_items_file, engine='openpyxl')
+            df = pd.read_excel(items_file, engine='openpyxl')
             
             # تصفية العناصر حسب التصنيف
             filtered_items = df[df['التصنيف'] == category]
@@ -426,13 +500,20 @@ class ExcelManager:
             print(f"خطأ في تحميل العناصر حسب التصنيف: {e}")
             return pd.DataFrame()
     
-    def get_all_items(self):
-        """الحصول على جميع العناصر"""
+    def get_all_items(self, project_name=None):
+        """الحصول على جميع العناصر في المشروع"""
         try:
-            if not os.path.exists(self.master_items_file):
-                self.create_master_items_file()
+            # إذا لم يتم تحديد المشروع، استخدم الملف الأساسي (للتوافق)
+            if project_name:
+                items_file = self.get_project_items_file(project_name)
+                if not os.path.exists(items_file):
+                    self.create_project_items_file(project_name)
+            else:
+                items_file = self.master_items_file
+                if not os.path.exists(items_file):
+                    self.create_master_items_file()
             
-            df = pd.read_excel(self.master_items_file, engine='openpyxl')
+            df = pd.read_excel(items_file, engine='openpyxl')
             return df
             
         except Exception as e:

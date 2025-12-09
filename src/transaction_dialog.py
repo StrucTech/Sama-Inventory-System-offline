@@ -262,10 +262,10 @@ class TransactionDialog(QDialog):
             
             # البحث عن معلومات العنصر الكاملة
             try:
-                # البحث في ملف العناصر الأساسية
-                master_items = excel_manager.get_all_items()
-                if not master_items.empty:
-                    item_row = master_items[master_items['اسم_العنصر'] == item_name]
+                # البحث في ملف العناصر الخاص بالمشروع
+                project_items = excel_manager.get_all_items(self.project_name)
+                if not project_items.empty:
+                    item_row = project_items[project_items['اسم_العنصر'] == item_name]
                     if not item_row.empty:
                         self.selected_item_id = item_row.iloc[0]['Item_ID']
                         self.item_info = {
@@ -544,9 +544,9 @@ class TransactionDialog(QDialog):
         QApplication.instance().setStyleSheet(QApplication.instance().styleSheet() + message_style)
     
     def load_categories(self):
-        """تحميل قائمة التصنيفات"""
+        """تحميل قائمة التصنيفات من المشروع"""
         try:
-            categories = excel_manager.get_all_categories()
+            categories = excel_manager.get_all_categories(self.project_name)
             self.category_combo.clear()
             self.category_combo.addItem("اختر التصنيف")
             if categories:

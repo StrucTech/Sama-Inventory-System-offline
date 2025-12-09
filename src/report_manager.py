@@ -329,10 +329,10 @@ class ReportManager:
                     stats_df.index.name = 'الإحصائية'
                     stats_df.to_excel(writer, sheet_name='إحصائيات المشروع')
                 
-                # 6. ملخص العناصر الأساسية
-                master_items = self.excel_manager.get_all_items()
-                if not master_items.empty:
-                    master_items.to_excel(writer, sheet_name='العناصر الأساسية', index=False)
+                # 6. ملخص العناصر الخاصة بالمشروع
+                project_items = self.excel_manager.get_all_items(project_name)
+                if not project_items.empty:
+                    project_items.to_excel(writer, sheet_name='عناصر المشروع', index=False)
                 
                 # 7. تقرير منفصل حسب التصنيف
                 if not inventory_df.empty:
@@ -624,13 +624,13 @@ class ReportManager:
                     except Exception as e:
                         print(f"خطأ في تحليل أعلى العناصر: {e}")
                 
-                # 10. العناصر الأساسية (قاعدة البيانات)
+                # 10. عناصر المشروع (قاعدة البيانات)
                 try:
-                    master_items = self.excel_manager.get_all_items()
-                    if master_items is not None and not master_items.empty:
-                        master_items.to_excel(writer, sheet_name='قاعدة العناصر', index=False)
+                    project_items = self.excel_manager.get_all_items(project_name)
+                    if project_items is not None and not project_items.empty:
+                        project_items.to_excel(writer, sheet_name='قاعدة عناصر المشروع', index=False)
                 except Exception as e:
-                    print(f"خطأ في قاعدة العناصر: {e}")
+                    print(f"خطأ في قاعدة عناصر المشروع: {e}")
                 
                 # 11. تنبيهات المخزون والصلاحية
                 try:
@@ -1043,13 +1043,13 @@ class ReportManager:
                 except Exception as e:
                     print(f"خطأ في أعلى العناصر: {e}")
                 
-                # 10. قاعدة العناصر
+                # 10. قاعدة عناصر المشروع
                 try:
-                    master_items = self.excel_manager.get_all_items()
-                    if master_items is not None and not master_items.empty:
-                        master_items.to_excel(writer, sheet_name='قاعدة العناصر', index=False)
+                    project_items = self.excel_manager.get_all_items(project_name)
+                    if project_items is not None and not project_items.empty:
+                        project_items.to_excel(writer, sheet_name='قاعدة عناصر المشروع', index=False)
                 except Exception as e:
-                    print(f"خطأ في قاعدة العناصر: {e}")
+                    print(f"خطأ في قاعدة عناصر المشروع: {e}")
                 
                 # 11. التنبيهات
                 try:

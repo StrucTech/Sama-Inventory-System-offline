@@ -854,7 +854,7 @@ class MainWindow(QMainWindow):
     def show_items_management(self):
         """إظهار نافذة إنشاء عنصر جديد"""
         from items_manager import ItemsManager
-        manager = ItemsManager(self)
+        manager = ItemsManager(self, self.project_name)
         manager.show()
     
     def show_edit_recent_transactions(self):

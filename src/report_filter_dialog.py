@@ -342,10 +342,10 @@ class ReportFilterDialog(QDialog):
                     stats_df.index.name = 'الإحصائية'
                     stats_df.to_excel(writer, sheet_name='إحصائيات المشروع')
                 
-                # 6. ملخص العناصر الأساسية
-                master_items = self.report_manager.excel_manager.get_all_items()
-                if not master_items.empty:
-                    master_items.to_excel(writer, sheet_name='العناصر الأساسية', index=False)
+                # 6. ملخص عناصر المشروع
+                project_items = self.report_manager.excel_manager.get_all_items(self.project_name)
+                if not project_items.empty:
+                    project_items.to_excel(writer, sheet_name='عناصر المشروع', index=False)
                 
                 # 7. تقرير منفصل حسب التصنيف
                 if not inventory_df.empty and 'التصنيف' in inventory_df.columns:
