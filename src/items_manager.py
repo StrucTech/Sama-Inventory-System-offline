@@ -230,35 +230,57 @@ class ItemsManager(QDialog):
         
         QComboBox#category_combo {
             font-size: 13px;
-            padding: 8px;
-            border: 2px solid #bdc3c7;
+            padding: 8px 8px 8px 8px;
+            border: 2px solid #2c3e50;
             border-radius: 5px;
             background-color: white;
             color: #2c3e50;
             min-height: 20px;
+            font-weight: bold;
         }
         
         QComboBox#category_combo:focus {
-            border-color: #3498db;
+            border: 2px solid #3498db;
             background-color: #ffffff;
+            color: #2c3e50;
         }
         
         QComboBox#category_combo::drop-down {
-            border: none;
-            background-color: #ecf0f1;
+            border-left: 2px solid #2c3e50;
+            background-color: #34495e;
+            width: 30px;
+            border-radius: 3px;
+            margin-right: 2px;
         }
         
         QComboBox#category_combo::down-arrow {
-            image: none;
+            width: 0px;
+            height: 0px;
         }
         
         QComboBox#category_combo QAbstractItemView {
-            border: 2px solid #bdc3c7;
+            border: 2px solid #2c3e50;
             background-color: white;
             color: #2c3e50;
             selection-background-color: #3498db;
             selection-color: white;
             padding: 5px;
+            font-weight: bold;
+        }
+        
+        QComboBox#category_combo QAbstractItemView::item {
+            padding: 8px;
+            height: 25px;
+        }
+        
+        QComboBox#category_combo QAbstractItemView::item:hover {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+        }
+        
+        QComboBox#category_combo QAbstractItemView::item:selected {
+            background-color: #3498db;
+            color: white;
         }
         
         QSpinBox#spin_field:focus {
@@ -470,19 +492,31 @@ class ItemsManager(QDialog):
         item_name = self.item_name_edit.text().strip()
         if not item_name:
             QMessageBox.warning(self, "خطأ", "يرجى إدخال اسم العنصر")
+            self.item_name_edit.setFocus()
             return False
         
-        # التحقق من عدم تكرار الاسم
-        if not self.items_data.empty:
-            existing_names = self.items_data['اسم_العنصر'].str.lower()
-            if item_name.lower() in existing_names.values:
-                QMessageBox.warning(self, "خطأ", "يوجد عنصر بهذا الاسم مسبقاً")
-                return False
+        # التحقق من عدم تكرار الاسم (مطابقة دقيقة)
+        if not self.items_data.empty and 'اسم_العنصر' in self.items_data.columns:
+            existing_names = self.items_data['اسم_العنصر'].str.strip()
+            
+            # البحث عن تطابق دقيق أو تطابق بدون حساسية الحروف
+            for existing_name in existing_names:
+                if existing_name.lower() == item_name.lower():
+                    QMessageBox.warning(
+                        self, 
+                        "عنصر مكرر",
+                        f"يوجد عنصر بهذا الاسم مسبقاً:\n\n'{existing_name}'\n\n"
+                        "يرجى إدخال اسم عنصر مختلف."
+                    )
+                    self.item_name_edit.setFocus()
+                    self.item_name_edit.selectAll()
+                    return False
         
         # التحقق من التصنيف
         category = self.category_combo.currentText().strip()
         if not category:
             QMessageBox.warning(self, "خطأ", "يرجى اختيار أو إدخال التصنيف")
+            self.category_combo.setFocus()
             return False
         
         return True
