@@ -49,31 +49,17 @@ class InventoryViewer(QMainWindow):
         header_layout = self.create_header()
         main_layout.addLayout(header_layout)
         
-        # تخطيط أفقي للجدول والتحكم
-        content_layout = QHBoxLayout()
-        content_layout.setSpacing(20)
-        
-        # الجدول على اليسار (يأخذ معظم المساحة)
-        self.create_inventory_table()
-        content_layout.addWidget(self.inventory_table, stretch=3)
-        
-        # منطقة التحكم على اليمين
-        control_layout = QVBoxLayout()
-        control_layout.setSpacing(10)
-        
         # منطقة البحث والتصفية
-        filter_widget = self.create_filter_section()
-        control_layout.addWidget(filter_widget)
+        filter_layout = self.create_filter_section()
+        main_layout.addLayout(filter_layout)
+        
+        # جدول المخزون
+        self.create_inventory_table()
+        main_layout.addWidget(self.inventory_table)
         
         # منطقة الأزرار
         buttons_layout = self.create_buttons_section()
-        control_layout.addLayout(buttons_layout)
-        
-        # مساحة مرنة للأسفل
-        control_layout.addStretch()
-        
-        content_layout.addLayout(control_layout, stretch=1)
-        main_layout.addLayout(content_layout, stretch=1)
+        main_layout.addLayout(buttons_layout)
         
         # شريط الحالة
         self.create_status_bar()
@@ -102,8 +88,7 @@ class InventoryViewer(QMainWindow):
         filter_frame.setObjectName("filter_frame")
         filter_frame.setFrameStyle(QFrame.Shape.Box)
         
-        layout = QVBoxLayout(filter_frame)
-        layout.setSpacing(15)
+        layout = QHBoxLayout(filter_frame)
         
         # بحث بالاسم
         search_label = QLabel("بحث:")
@@ -140,7 +125,7 @@ class InventoryViewer(QMainWindow):
         refresh_btn.clicked.connect(self.refresh_data)
         layout.addWidget(refresh_btn)
         
-        return filter_frame
+        return QVBoxLayout().addWidget(filter_frame) or QVBoxLayout()
     
     def create_inventory_table(self):
         """إنشاء جدول المخزون"""
@@ -175,20 +160,7 @@ class InventoryViewer(QMainWindow):
     
     def create_buttons_section(self):
         """إنشاء منطقة الأزرار"""
-        layout = QVBoxLayout()
-        layout.setSpacing(10)
-        
-        # زر تصدير Excel
-        excel_btn = QPushButton("تصدير إلى Excel")
-        excel_btn.setObjectName("excel_button")
-        excel_btn.clicked.connect(self.export_to_excel)
-        layout.addWidget(excel_btn)
-        
-        # زر تصدير PDF
-        pdf_btn = QPushButton("تصدير إلى PDF")
-        pdf_btn.setObjectName("pdf_button")
-        pdf_btn.clicked.connect(self.export_to_pdf)
-        layout.addWidget(pdf_btn)
+        layout = QHBoxLayout()
         
         # زر إدخال عنصر
         entry_btn = QPushButton("إدخال عنصر")
@@ -201,6 +173,9 @@ class InventoryViewer(QMainWindow):
         exit_btn.setObjectName("exit_button")
         exit_btn.clicked.connect(self.add_exit)
         layout.addWidget(exit_btn)
+        
+        # مساحة مرنة
+        layout.addStretch()
         
         # زر إغلاق
         close_btn = QPushButton("إغلاق")
@@ -318,33 +293,6 @@ class InventoryViewer(QMainWindow):
             background-color: #2980b9;
         }
         
-        QPushButton#excel_button {
-            background-color: #f39c12;
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
-            border: none;
-            border-radius: 8px;
-            padding: 12px 20px;
-        }
-        
-        QPushButton#excel_button:hover {
-            background-color: #e67e22;
-        }
-        
-        QPushButton#pdf_button {
-            background-color: #e67e22;
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
-            border: none;
-            border-radius: 8px;
-            padding: 12px 20px;
-        }
-        
-        QPushButton#pdf_button:hover {
-            background-color: #d35400;
-        }
         
         QPushButton#entry_button {
             background-color: #27ae60;
@@ -518,33 +466,6 @@ class InventoryViewer(QMainWindow):
         self.filter_data()
         self.status_bar.showMessage("تم تحديث البيانات", 2000)
     
-    def export_to_excel(self):
-        """تصدير إلى Excel"""
-        try:
-            from report_manager import ReportManager
-            report_manager = ReportManager(excel_manager)
-            
-            filepath, message = report_manager.export_inventory_to_excel(self.project_name)
-            if filepath:
-                QMessageBox.information(self, "نجح", f"{message}\nمسار الملف: {filepath}")
-            else:
-                QMessageBox.warning(self, "خطأ", message)
-        except Exception as e:
-            QMessageBox.critical(self, "خطأ", f"خطأ في تصدير Excel: {str(e)}")
-    
-    def export_to_pdf(self):
-        """تصدير إلى PDF"""
-        try:
-            from report_manager import ReportManager
-            report_manager = ReportManager(excel_manager)
-            
-            filepath, message = report_manager.export_inventory_to_pdf(self.project_name)
-            if filepath:
-                QMessageBox.information(self, "نجح", f"{message}\nمسار الملف: {filepath}")
-            else:
-                QMessageBox.warning(self, "خطأ", message)
-        except Exception as e:
-            QMessageBox.critical(self, "خطأ", f"خطأ في تصدير PDF: {str(e)}")
     
     def add_entry(self):
         """إضافة حركة دخول"""
