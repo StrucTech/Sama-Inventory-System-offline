@@ -555,7 +555,7 @@ class TransactionDialog(QDialog):
             QMessageBox.warning(self, "خطأ", f"خطأ في تحميل التصنيفات: {str(e)}")
     
     def load_items_by_category(self):
-        """تحميل العناصر حسب التصنيف المختار"""
+        """تحميل العناصر حسب التصنيف المختار في المشروع"""
         category = self.category_combo.currentText()
         
         # إعادة تعيين العناصر والمعلومات
@@ -567,7 +567,7 @@ class TransactionDialog(QDialog):
             return
         
         try:
-            items = excel_manager.get_items_by_category(category)
+            items = excel_manager.get_items_by_category(category, self.project_name)
             self.item_combo.setEnabled(True)
             self.item_combo.addItem("اختر العنصر")
             
@@ -579,7 +579,7 @@ class TransactionDialog(QDialog):
             QMessageBox.warning(self, "خطأ", f"خطأ في تحميل العناصر: {str(e)}")
     
     def load_selected_item_info(self):
-        """تحميل معلومات العنصر المختار"""
+        """تحميل معلومات العنصر المختار من المشروع"""
         if self.item_combo.currentIndex() <= 0:  # إذا لم يتم اختيار عنصر
             self.clear_item_info()
             return
@@ -587,7 +587,7 @@ class TransactionDialog(QDialog):
         try:
             item_id = self.item_combo.currentData()
             if item_id:
-                self.item_info = excel_manager.get_item_info(item_id)
+                self.item_info = excel_manager.get_item_info(item_id, self.project_name)
                 
                 if self.item_info is not None:
                     # عرض مدة الصلاحية
