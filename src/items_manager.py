@@ -6,7 +6,7 @@
 from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
                            QPushButton, QTableWidget, QTableWidgetItem,
                            QHeaderView, QMessageBox, QLineEdit, QFormLayout,
-                           QFrame, QTextEdit)
+                           QFrame, QTextEdit, QComboBox)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from excel_manager import excel_manager
@@ -77,11 +77,16 @@ class ItemsManager(QDialog):
         self.item_name_edit.setObjectName("input_field")
         layout.addRow("اسم العنصر:", self.item_name_edit)
         
-        # التصنيف
-        self.category_edit = QLineEdit()
-        self.category_edit.setPlaceholderText("أدخل التصنيف")
-        self.category_edit.setObjectName("input_field")
-        layout.addRow("التصنيف:", self.category_edit)
+        # التصنيف - ComboBox يسمح بإدخال نصوص جديدة
+        self.category_combo = QComboBox()
+        self.category_combo.setObjectName("category_combo")
+        self.category_combo.setEditable(True)  # السماح بإدخال نصوص جديدة
+        self.category_combo.lineEdit().setPlaceholderText("اختر أو اكتب تصنيف جديد")
+        
+        # تحميل التصنيفات الموجودة
+        self.load_categories()
+        
+        layout.addRow("التصنيف:", self.category_combo)
         
         # مدة الصلاحية
         self.shelf_life_input = QLineEdit()
@@ -221,6 +226,39 @@ class ItemsManager(QDialog):
             background-color: white;
             color: #2c3e50;
             min-height: 20px;
+        }
+        
+        QComboBox#category_combo {
+            font-size: 13px;
+            padding: 8px;
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+            background-color: white;
+            color: #2c3e50;
+            min-height: 20px;
+        }
+        
+        QComboBox#category_combo:focus {
+            border-color: #3498db;
+            background-color: #ffffff;
+        }
+        
+        QComboBox#category_combo::drop-down {
+            border: none;
+            background-color: #ecf0f1;
+        }
+        
+        QComboBox#category_combo::down-arrow {
+            image: none;
+        }
+        
+        QComboBox#category_combo QAbstractItemView {
+            border: 2px solid #bdc3c7;
+            background-color: white;
+            color: #2c3e50;
+            selection-background-color: #3498db;
+            selection-color: white;
+            padding: 5px;
         }
         
         QSpinBox#spin_field:focus {
@@ -374,6 +412,23 @@ class ItemsManager(QDialog):
         """
         QApplication.instance().setStyleSheet(QApplication.instance().styleSheet() + message_style)
     
+    def load_categories(self):
+        """تحميل التصنيفات الموجودة في ComboBox"""
+        try:
+            df = pd.read_excel(excel_manager.master_items_file, engine='openpyxl')
+            
+            if not df.empty and 'التصنيف' in df.columns:
+                # الحصول على التصنيفات الفريدة
+                categories = df['التصنيف'].unique()
+                categories = [cat for cat in categories if pd.notna(cat)]
+                categories = sorted(categories)
+                
+                # إضافة التصنيفات إلى ComboBox
+                self.category_combo.addItems(categories)
+                
+        except Exception as e:
+            print(f"تحذير: خطأ في تحميل التصنيفات: {str(e)}")
+    
     def load_items_data(self):
         """تحميل بيانات العناصر"""
         try:
@@ -425,9 +480,9 @@ class ItemsManager(QDialog):
                 return False
         
         # التحقق من التصنيف
-        category = self.category_edit.text().strip()
+        category = self.category_combo.currentText().strip()
         if not category:
-            QMessageBox.warning(self, "خطأ", "يرجى إدخال التصنيف")
+            QMessageBox.warning(self, "خطأ", "يرجى اختيار أو إدخال التصنيف")
             return False
         
         return True
@@ -440,7 +495,7 @@ class ItemsManager(QDialog):
         try:
             # جمع البيانات
             item_name = self.item_name_edit.text().strip()
-            category = self.category_edit.text().strip()
+            category = self.category_combo.currentText().strip()
             
             # معالجة مدة الصلاحية - يمكن أن تكون فارغة أو رقم
             shelf_life_text = self.shelf_life_input.text().strip()
@@ -477,7 +532,8 @@ class ItemsManager(QDialog):
     def clear_input_fields(self):
         """مسح حقول الإدخال"""
         self.item_name_edit.clear()
-        self.category_edit.clear()
+        self.category_combo.setCurrentIndex(0)  # إعادة تعيين إلى أول خيار
+        self.category_combo.lineEdit().clear()  # مسح النص المدخل يدوياً
         self.shelf_life_input.clear()
         self.description_edit.clear()
     
