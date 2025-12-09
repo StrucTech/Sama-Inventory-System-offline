@@ -148,12 +148,6 @@ class TransactionDialog(QDialog):
         
         main_layout.addLayout(buttons_layout)
         
-        # إضافة زر لإدارة العناصر
-        manage_items_btn = QPushButton("إنشاء عنصر جديد")
-        manage_items_btn.setObjectName("manage_button")
-        manage_items_btn.clicked.connect(self.show_items_manager)
-        main_layout.addWidget(manage_items_btn)
-        
         # تحميل التصنيفات للدخول فقط
         if self.transaction_type == "دخول":
             self.load_categories()
@@ -517,21 +511,6 @@ class TransactionDialog(QDialog):
         QPushButton#small_button:hover {
             background-color: #2980b9;
         }
-        
-        QPushButton#manage_button {
-            background-color: #9b59b6;
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
-            border: none;
-            border-radius: 8px;
-            padding: 10px;
-            min-height: 20px;
-        }
-        
-        QPushButton#manage_button:hover {
-            background-color: #8e44ad;
-        }
         """
         
         self.setStyleSheet(style)
@@ -793,10 +772,3 @@ class TransactionDialog(QDialog):
         except Exception as e:
             QMessageBox.critical(self, "خطأ", f"خطأ في حفظ الحركة: {str(e)}")
     
-    def show_items_manager(self):
-        """إظهار مدير العناصر"""
-        from items_manager import ItemsManager
-        manager = ItemsManager(self)
-        if manager.exec():
-            # تحديث معلومات العنصر إذا تم تعديلها
-            self.load_item_info()
