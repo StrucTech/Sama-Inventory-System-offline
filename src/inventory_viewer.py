@@ -49,17 +49,31 @@ class InventoryViewer(QMainWindow):
         header_layout = self.create_header()
         main_layout.addLayout(header_layout)
         
-        # منطقة البحث والتصفية
-        filter_layout = self.create_filter_section()
-        main_layout.addLayout(filter_layout)
+        # تخطيط أفقي للجدول والتحكم
+        content_layout = QHBoxLayout()
+        content_layout.setSpacing(20)
         
-        # جدول المخزون
+        # الجدول على اليسار (يأخذ معظم المساحة)
         self.create_inventory_table()
-        main_layout.addWidget(self.inventory_table)
+        content_layout.addWidget(self.inventory_table, stretch=3)
+        
+        # منطقة التحكم على اليمين
+        control_layout = QVBoxLayout()
+        control_layout.setSpacing(10)
+        
+        # منطقة البحث والتصفية
+        filter_widget = self.create_filter_section()
+        control_layout.addWidget(filter_widget)
         
         # منطقة الأزرار
         buttons_layout = self.create_buttons_section()
-        main_layout.addLayout(buttons_layout)
+        control_layout.addLayout(buttons_layout)
+        
+        # مساحة مرنة للأسفل
+        control_layout.addStretch()
+        
+        content_layout.addLayout(control_layout, stretch=1)
+        main_layout.addLayout(content_layout, stretch=1)
         
         # شريط الحالة
         self.create_status_bar()
@@ -88,7 +102,8 @@ class InventoryViewer(QMainWindow):
         filter_frame.setObjectName("filter_frame")
         filter_frame.setFrameStyle(QFrame.Shape.Box)
         
-        layout = QHBoxLayout(filter_frame)
+        layout = QVBoxLayout(filter_frame)
+        layout.setSpacing(15)
         
         # بحث بالاسم
         search_label = QLabel("بحث:")
@@ -125,7 +140,7 @@ class InventoryViewer(QMainWindow):
         refresh_btn.clicked.connect(self.refresh_data)
         layout.addWidget(refresh_btn)
         
-        return QVBoxLayout().addWidget(filter_frame) or QVBoxLayout()
+        return filter_frame
     
     def create_inventory_table(self):
         """إنشاء جدول المخزون"""
@@ -160,7 +175,8 @@ class InventoryViewer(QMainWindow):
     
     def create_buttons_section(self):
         """إنشاء منطقة الأزرار"""
-        layout = QHBoxLayout()
+        layout = QVBoxLayout()
+        layout.setSpacing(10)
         
         # زر تصدير Excel
         excel_btn = QPushButton("تصدير إلى Excel")
@@ -185,9 +201,6 @@ class InventoryViewer(QMainWindow):
         exit_btn.setObjectName("exit_button")
         exit_btn.clicked.connect(self.add_exit)
         layout.addWidget(exit_btn)
-        
-        # مساحة مرنة
-        layout.addStretch()
         
         # زر إغلاق
         close_btn = QPushButton("إغلاق")
