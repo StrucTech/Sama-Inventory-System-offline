@@ -65,32 +65,17 @@ class TransactionDialog(QDialog):
         project_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main_layout.addWidget(project_label)
         
-        # للخروج، إنشاء تخطيط أفقي مع جدول على اليسار
+        # للخروج، إضافة جدول العناصر المتاحة
         if self.transaction_type == "خروج":
-            content_layout = QHBoxLayout()
-            content_layout.setSpacing(20)
-            
-            # الجدول على اليسار (يأخذ معظم المساحة)
             self.create_inventory_table()
-            content_layout.addWidget(self.inventory_table, stretch=3)
-            
-            # منطقة التحكم على اليمين
-            control_layout = QVBoxLayout()
-            control_layout.setSpacing(10)
-            
-            # إطار البيانات على اليمين
-            form_frame = QFrame()
-            form_frame.setObjectName("form_frame")
-            form_frame.setFrameStyle(QFrame.Shape.Box)
-            form_layout = QFormLayout(form_frame)
-            form_layout.setSpacing(15)
-        else:
-            # للدخول: التخطيط العمودي العادي
-            form_frame = QFrame()
-            form_frame.setObjectName("form_frame")
-            form_frame.setFrameStyle(QFrame.Shape.Box)
-            form_layout = QFormLayout(form_frame)
-            form_layout.setSpacing(15)
+            main_layout.addWidget(self.inventory_table)
+        
+        # إطار البيانات
+        form_frame = QFrame()
+        form_frame.setObjectName("form_frame")
+        form_frame.setFrameStyle(QFrame.Shape.Box)
+        form_layout = QFormLayout(form_frame)
+        form_layout.setSpacing(15)
         
         if self.transaction_type == "خروج":
             # للخروج: عرض معلومات العنصر المحدد
@@ -143,64 +128,31 @@ class TransactionDialog(QDialog):
         self.notes_edit.setMaximumHeight(100)
         form_layout.addRow("ملاحظات:", self.notes_edit)
         
-        # للخروج: إضافة form_layout إلى control_layout
-        if self.transaction_type == "خروج":
-            control_layout.addWidget(form_frame)
-            
-            # الأزرار للخروج (عمودية)
-            buttons_layout = QVBoxLayout()
-            buttons_layout.setSpacing(10)
-            
-            # زر الحفظ
-            self.save_btn = QPushButton("حفظ الخروج")
-            self.save_btn.setObjectName("save_button")
-            self.save_btn.clicked.connect(self.save_transaction)
-            buttons_layout.addWidget(self.save_btn)
-            
-            # زر الإلغاء
-            cancel_btn = QPushButton("إلغاء")
-            cancel_btn.setObjectName("cancel_button")
-            cancel_btn.clicked.connect(self.reject)
-            buttons_layout.addWidget(cancel_btn)
-            
-            # زر إدارة العناصر
-            manage_items_btn = QPushButton("إنشاء عنصر جديد")
-            manage_items_btn.setObjectName("manage_button")
-            manage_items_btn.clicked.connect(self.show_items_manager)
-            buttons_layout.addWidget(manage_items_btn)
-            
-            # مساحة مرنة
-            buttons_layout.addStretch()
-            
-            control_layout.addLayout(buttons_layout)
-            content_layout.addLayout(control_layout, stretch=1)
-            main_layout.addLayout(content_layout, stretch=1)
-        else:
-            # للدخول: التخطيط العمودي العادي
-            main_layout.addWidget(form_frame)
-            
-            # الأزرار للدخول (أفقية)
-            buttons_layout = QHBoxLayout()
-            
-            # زر الحفظ
-            self.save_btn = QPushButton("حفظ الدخول")
-            self.save_btn.setObjectName("save_button")
-            self.save_btn.clicked.connect(self.save_transaction)
-            buttons_layout.addWidget(self.save_btn)
-            
-            # زر الإلغاء
-            cancel_btn = QPushButton("إلغاء")
-            cancel_btn.setObjectName("cancel_button")
-            cancel_btn.clicked.connect(self.reject)
-            buttons_layout.addWidget(cancel_btn)
-            
-            main_layout.addLayout(buttons_layout)
-            
-            # إضافة زر لإدارة العناصر
-            manage_items_btn = QPushButton("إنشاء عنصر جديد")
-            manage_items_btn.setObjectName("manage_button")
-            manage_items_btn.clicked.connect(self.show_items_manager)
-            main_layout.addWidget(manage_items_btn)
+        main_layout.addWidget(form_frame)
+        
+        # الأزرار
+        buttons_layout = QHBoxLayout()
+        
+        # زر الحفظ
+        save_text = "حفظ الدخول" if self.transaction_type == "دخول" else "حفظ الخروج"
+        self.save_btn = QPushButton(save_text)
+        self.save_btn.setObjectName("save_button")
+        self.save_btn.clicked.connect(self.save_transaction)
+        buttons_layout.addWidget(self.save_btn)
+        
+        # زر الإلغاء
+        cancel_btn = QPushButton("إلغاء")
+        cancel_btn.setObjectName("cancel_button")
+        cancel_btn.clicked.connect(self.reject)
+        buttons_layout.addWidget(cancel_btn)
+        
+        main_layout.addLayout(buttons_layout)
+        
+        # إضافة زر لإدارة العناصر
+        manage_items_btn = QPushButton("إنشاء عنصر جديد")
+        manage_items_btn.setObjectName("manage_button")
+        manage_items_btn.clicked.connect(self.show_items_manager)
+        main_layout.addWidget(manage_items_btn)
         
         # تحميل التصنيفات للدخول فقط
         if self.transaction_type == "دخول":
@@ -235,6 +187,9 @@ class TransactionDialog(QDialog):
         self.inventory_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.inventory_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         
+        # تفعيل Scroll عند الحاجة
+        self.inventory_table.setMaximumHeight(16777215)  # أقصى ارتفاع ممكن
+        
         # ضبط عرض الأعمدة
         header = self.inventory_table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)  # اسم العنصر
@@ -243,8 +198,10 @@ class TransactionDialog(QDialog):
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)  # الصلاحية
         
         # الجدول يستخدم كامل المساحة المتاحة
-        self.inventory_table.setMinimumHeight(500)
-        # إزالة الحد الأقصى ليتوسع حسب النافذة
+        self.inventory_table.setMinimumHeight(600)
+        
+        # ضبط ارتفاع الصفوف
+        self.inventory_table.verticalHeader().setDefaultSectionSize(50)
         
         # تحميل البيانات
         self.load_inventory_data()
@@ -452,15 +409,17 @@ class TransactionDialog(QDialog):
             border: 2px solid #bdc3c7;
             border-radius: 5px;
             gridline-color: #bdc3c7;
-            font-size: 14px;
+            font-size: 16px;
             color: #2c3e50;
+            show-decoration-selected: 1;
         }
         
         QTableWidget#inventory_table::item {
-            padding: 10px;
+            padding: 15px;
             border-bottom: 1px solid #bdc3c7;
             color: #2c3e50;
             background-color: white;
+            min-height: 50px;
         }
         
         QTableWidget#inventory_table::item:selected {
@@ -483,10 +442,32 @@ class TransactionDialog(QDialog):
         QHeaderView::section {
             background-color: #2c3e50;
             color: white;
-            padding: 12px;
+            padding: 15px;
             border: 1px solid #34495e;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 15px;
+        }
+        
+        QScrollBar:vertical {
+            background-color: #ecf0f1;
+            width: 16px;
+            border: 1px solid #bdc3c7;
+            border-radius: 8px;
+        }
+        
+        QScrollBar::handle:vertical {
+            background-color: #3498db;
+            border-radius: 8px;
+            min-height: 25px;
+        }
+        
+        QScrollBar::handle:vertical:hover {
+            background-color: #2980b9;
+        }
+        
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            border: none;
+            background: none;
         }
         
         QPushButton#save_button {
