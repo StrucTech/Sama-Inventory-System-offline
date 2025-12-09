@@ -5,42 +5,13 @@
 
 from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
                            QPushButton, QFormLayout, QFrame, QMessageBox,
-                           QDateEdit, QTextEdit, QCalendarWidget)
+                           QDateEdit, QTextEdit)
 from PyQt6.QtCore import Qt, QDate
 from PyQt6.QtGui import QFont
 from datetime import datetime as dt, timedelta
 from report_manager import ReportManager
 from excel_manager import excel_manager
 import os
-
-
-class RestrictedDateEdit(QDateEdit):
-    """محرر تاريخ بقيود - يعطل التواريخ بعد آخر عملية"""
-    
-    def __init__(self, max_allowed_date=None):
-        super().__init__()
-        self.max_allowed_date = max_allowed_date
-        
-        # إنشاء calendar مخصص
-        self.cal = QCalendarWidget()
-        self.setCalendarWidget(self.cal)
-        self.setCalendarPopup(True)
-        
-        # معطل كل التواريخ بعد آخر عملية
-        self.update_disabled_dates()
-    
-    def set_max_date(self, max_date):
-        """تعيين أقصى تاريخ مسموح"""
-        self.max_allowed_date = max_date
-        self.setMaximumDate(QDate(max_date)) if max_date else None
-        self.update_disabled_dates()
-    
-    def update_disabled_dates(self):
-        """تحديث التواريخ المعطلة"""
-        if self.max_allowed_date:
-            # تعيين الحد الأقصى للتاريخ
-            max_qdate = QDate(self.max_allowed_date)
-            self.cal.setMaximumDate(max_qdate)
 
 
 class ReportFilterDialog(QDialog):
@@ -50,7 +21,6 @@ class ReportFilterDialog(QDialog):
         super().__init__(parent)
         self.project_name = project_name
         self.report_manager = ReportManager(excel_manager)
-        self.last_transaction_date = self.get_last_transaction_date()  # آخر عملية
         self.setup_ui()
         self.setup_styles()
         self.load_last_report_info()
@@ -95,16 +65,17 @@ class ReportFilterDialog(QDialog):
         form_layout.setSpacing(15)
         
         # تاريخ البداية
-        self.start_date = RestrictedDateEdit(self.last_transaction_date)
+        self.start_date = QDateEdit()
         self.start_date.setObjectName("date_input")
+        self.start_date.setCalendarPopup(True)
         self.start_date.setDate(QDate.currentDate().addDays(-30))  # آخر 30 يوم
         form_layout.addRow("من تاريخ:", self.start_date)
         
-        # تاريخ النهاية (معطل بعد آخر عملية)
-        self.end_date = RestrictedDateEdit(self.last_transaction_date)
+        # تاريخ النهاية
+        self.end_date = QDateEdit()
         self.end_date.setObjectName("date_input")
-        self.end_date.setDate(QDate.currentDate() if not self.last_transaction_date 
-                            else QDate(self.last_transaction_date))
+        self.end_date.setCalendarPopup(True)
+        self.end_date.setDate(QDate.currentDate())
         form_layout.addRow("إلى تاريخ:", self.end_date)
         
         main_layout.addWidget(filter_frame)
@@ -119,15 +90,6 @@ class ReportFilterDialog(QDialog):
         self.preview_text.setMaximumHeight(80)
         self.preview_text.setReadOnly(True)
         main_layout.addWidget(self.preview_text)
-        
-        # رسالة توضيحية عن التواريخ المعطلة
-        if self.last_transaction_date:
-            disabled_msg = QLabel(
-                f"⚠️ التواريخ بعد {self.last_transaction_date.strftime('%Y-%m-%d')} معطلة "
-                f"(آخر عملية تم تسجيلها)"
-            )
-            disabled_msg.setObjectName("info_label")
-            form_layout.addRow("", disabled_msg)
         
         # تحديث المعاينة عند تغيير التاريخ
         self.start_date.dateChanged.connect(self.update_preview)
@@ -172,28 +134,6 @@ class ReportFilterDialog(QDialog):
         buttons_layout.addWidget(cancel_btn)
         
         main_layout.addLayout(buttons_layout)
-    
-    def get_last_transaction_date(self):
-        """الحصول على تاريخ آخر عملية"""
-        try:
-            import pandas as pd
-            
-            project_file = os.path.join("projects", f"{self.project_name}_Transactions.xlsx")
-            if os.path.exists(project_file):
-                transactions_df = pd.read_excel(project_file, engine='openpyxl')
-                
-                if not transactions_df.empty and 'التاريخ' in transactions_df.columns:
-                    # تحويل التاريخ والبحث عن الأحدث
-                    transactions_df['التاريخ'] = pd.to_datetime(transactions_df['التاريخ'], errors='coerce')
-                    last_date = transactions_df['التاريخ'].max()
-                    
-                    if pd.notna(last_date):
-                        return last_date.date()
-            
-            return None
-        except Exception as e:
-            print(f"خطأ في الحصول على آخر عملية: {e}")
-            return None
     
     def center_on_screen(self):
         """توسيط النافذة على الشاشة"""
@@ -621,16 +561,6 @@ class ReportFilterDialog(QDialog):
             font-weight: bold;
             color: #3498db;
             padding: 5px;
-        }
-        
-        QLabel#info_label {
-            font-size: 12px;
-            color: #e74c3c;
-            font-weight: bold;
-            background-color: #ffeaa7;
-            border: 1px solid #f39c12;
-            border-radius: 5px;
-            padding: 8px;
         }
         
         QLabel#last_report_info {

@@ -177,6 +177,12 @@ class InventoryViewer(QMainWindow):
         # مساحة مرنة
         layout.addStretch()
         
+        # زر الإعدادات
+        settings_btn = QPushButton("إعدادات المشروع")
+        settings_btn.setObjectName("settings_button")
+        settings_btn.clicked.connect(self.open_settings)
+        layout.addWidget(settings_btn)
+        
         # زر إغلاق
         close_btn = QPushButton("إغلاق")
         close_btn.setObjectName("close_button")
@@ -335,6 +341,20 @@ class InventoryViewer(QMainWindow):
         QPushButton#close_button:hover {
             background-color: #7f8c8d;
         }
+        
+        QPushButton#settings_button {
+            background-color: #9b59b6;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+        }
+        
+        QPushButton#settings_button:hover {
+            background-color: #8e44ad;
+        }
         """
         
         self.setStyleSheet(style)
@@ -479,6 +499,14 @@ class InventoryViewer(QMainWindow):
         from transaction_dialog import TransactionDialog
         dialog = TransactionDialog(self.project_name, "خروج", self)
         if dialog.exec():
+            self.refresh_data()
+    
+    def open_settings(self):
+        """فتح نافذة إعدادات المشروع"""
+        from project_settings import ProjectSettingsDialog
+        dialog = ProjectSettingsDialog(self.project_name, self)
+        if dialog.exec():
+            # تحديث البيانات عند تغيير الإعدادات
             self.refresh_data()
     
     def closeEvent(self, event):

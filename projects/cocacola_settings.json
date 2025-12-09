@@ -1,0 +1,4 @@
+{
+    "low_stock_threshold": 100,
+    "expiry_threshold_days": 300
+}
