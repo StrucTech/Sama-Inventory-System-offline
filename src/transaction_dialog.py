@@ -65,6 +65,25 @@ class TransactionDialog(QDialog):
         project_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main_layout.addWidget(project_label)
         
+        # الأزرار - للخروج فقط في الأعلى
+        if self.transaction_type == "خروج":
+            buttons_layout = QHBoxLayout()
+            
+            # زر الحفظ
+            save_text = "حفظ الدخول" if self.transaction_type == "دخول" else "حفظ الخروج"
+            self.save_btn = QPushButton(save_text)
+            self.save_btn.setObjectName("save_button")
+            self.save_btn.clicked.connect(self.save_transaction)
+            buttons_layout.addWidget(self.save_btn)
+            
+            # زر الإلغاء
+            cancel_btn = QPushButton("إلغاء")
+            cancel_btn.setObjectName("cancel_button")
+            cancel_btn.clicked.connect(self.reject)
+            buttons_layout.addWidget(cancel_btn)
+            
+            main_layout.addLayout(buttons_layout)
+        
         # للخروج، إضافة جدول العناصر المتاحة
         if self.transaction_type == "خروج":
             self.create_inventory_table()
@@ -130,23 +149,24 @@ class TransactionDialog(QDialog):
         
         main_layout.addWidget(form_frame)
         
-        # الأزرار
-        buttons_layout = QHBoxLayout()
-        
-        # زر الحفظ
-        save_text = "حفظ الدخول" if self.transaction_type == "دخول" else "حفظ الخروج"
-        self.save_btn = QPushButton(save_text)
-        self.save_btn.setObjectName("save_button")
-        self.save_btn.clicked.connect(self.save_transaction)
-        buttons_layout.addWidget(self.save_btn)
-        
-        # زر الإلغاء
-        cancel_btn = QPushButton("إلغاء")
-        cancel_btn.setObjectName("cancel_button")
-        cancel_btn.clicked.connect(self.reject)
-        buttons_layout.addWidget(cancel_btn)
-        
-        main_layout.addLayout(buttons_layout)
+        # الأزرار - للدخول فقط في الأسفل
+        if self.transaction_type == "دخول":
+            buttons_layout = QHBoxLayout()
+            
+            # زر الحفظ
+            save_text = "حفظ الدخول" if self.transaction_type == "دخول" else "حفظ الخروج"
+            self.save_btn = QPushButton(save_text)
+            self.save_btn.setObjectName("save_button")
+            self.save_btn.clicked.connect(self.save_transaction)
+            buttons_layout.addWidget(self.save_btn)
+            
+            # زر الإلغاء
+            cancel_btn = QPushButton("إلغاء")
+            cancel_btn.setObjectName("cancel_button")
+            cancel_btn.clicked.connect(self.reject)
+            buttons_layout.addWidget(cancel_btn)
+            
+            main_layout.addLayout(buttons_layout)
         
         # تحميل التصنيفات للدخول فقط
         if self.transaction_type == "دخول":
